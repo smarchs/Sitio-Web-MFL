@@ -15,6 +15,12 @@
             --fuente: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
             --ancho-bloque: 90%;
             --curva-apple: cubic-bezier(0.25, 1, 0.5, 1);
+            
+            /* ESCALA TIPOGRÁFICA UNIFICADA */
+            --fuente-cuerpo: clamp(18px, 2.5vw, 24px);
+            --fuente-subtitulo: clamp(22px, 3vw, 28px);
+            --fuente-titulo-seccion: clamp(26px, 3.8vw, 36px);
+            --fuente-h1: clamp(44px, 9vw, 92px);
         }
 
         @media (prefers-color-scheme: dark) {
@@ -67,27 +73,31 @@
         .seccion.active { display: flex; flex-direction: column; justify-content: flex-start; animation: appleFadeIn 0.8s var(--curva-apple) forwards; }
         @keyframes appleFadeIn { to { opacity: 1; transform: translateY(0); } }
 
-        /* TIPOGRAFÍA EDITORIAL */
-        h1 { font-size: clamp(44px, 9vw, 92px); font-weight: 800; letter-spacing: -0.05em; line-height: 1.05; margin-bottom: 50px; }
+        /* JERARQUÍA TIPOGRÁFICA REVISADA */
+        h1 { font-size: var(--fuente-h1); font-weight: 800; letter-spacing: -0.05em; line-height: 1.05; margin-bottom: 50px; }
         h1 span { font-size: 0.38em; vertical-align: super; font-weight: 600; }
-        h2 { font-size: clamp(22px, 3.5vw, 30px); font-weight: 700; color: var(--color-texto); letter-spacing: -0.03em; margin: 30px 0 10px 0; }
         
-        /* Control estricto de bordes superiores de inicio de pestaña */
+        /* Títulos de pestañas y bloques principales (Premios, Temporadas) */
+        h2 { font-size: var(--fuente-titulo-seccion); font-weight: 700; color: var(--color-texto); letter-spacing: -0.03em; margin: 35px 0 15px 0; }
+        
+        /* Subtítulos dentro de desplegables (Ediciones específicas) */
+        .desplegable-contenido h2 { font-size: var(--fuente-subtitulo); margin: 25px 0 10px 0; }
+        
         #reglamento > p:first-of-type, #premios > h2:first-of-type, #temporadas > h2:first-of-type, #historico > h2:first-of-type, #eventos > h2:first-of-type { border-top: 1px solid var(--borde); padding-top: 45px; margin-top: 0; margin-bottom: 20px; }
-        #premios h2:not(:first-of-type), #historico h2:not(:first-of-type), #eventos h2:not(:first-of-type) { border-top: 1px solid var(--borde); padding-top: 30px; margin-top: 35px; margin-bottom: 20px; }
+        #premios h2:not(:first-of-type), #historico h2:not(:first-of-type), #eventos h2:not(:first-of-type) { border-top: 1px solid var(--borde); padding-top: 30px; margin-top: 40px; margin-bottom: 20px; }
         
-        /* Bloques contenedores de temporadas */
-        .bloque-temporada-anterior { border-top: 1px solid var(--borde); margin-top: 40px; padding-top: 25px; }
+        .bloque-temporada-anterior { border-top: 1px solid var(--borde); margin-top: 45px; padding-top: 25px; }
         .bloque-temporada-actual h2, .bloque-temporada-anterior h2 { margin-top: 10px; }
         .desplegable-contenido > h2:first-of-type { margin-top: 5px; }
         
-        .regla-bloque { font-size: clamp(18px, 2.5vw, 24px); line-height: 1.55; color: var(--color-secundario); font-weight: 500; letter-spacing: -0.02em; margin-bottom: 25px; max-width: 95%; text-align: justify; }
-        .manifiesto-portada { font-size: clamp(22px, 3.8vw, 40px); line-height: 1.38; border-top: 1px solid var(--borde); padding-top: 45px; color: var(--color-secundario); font-weight: 500; letter-spacing: -0.035em; }
+        /* Bloque de texto base y Reglamento */
+        .regla-bloque { font-size: var(--fuente-cuerpo); line-height: 1.55; color: var(--color-secundario); font-weight: 500; letter-spacing: -0.02em; margin-bottom: 25px; max-width: 95%; text-align: justify; }
+        .manifiesto-portada { font-size: clamp(24px, 3.8vw, 40px); line-height: 1.38; border-top: 1px solid var(--borde); padding-top: 45px; color: var(--color-secundario); font-weight: 500; letter-spacing: -0.035em; }
 
         /* INTERFAZ DESPLEGABLE NATIVA */
         details { margin: 5px 0; width: 100%; }
         summary {
-            font-size: clamp(16px, 2.5vw, 20px); font-weight: 600; color: var(--color-secundario);
+            font-size: var(--fuente-cuerpo); font-weight: 600; color: var(--color-secundario);
             text-transform: uppercase; letter-spacing: 0.05em; padding: 12px 0;
             cursor: pointer; list-style: none; display: flex; align-items: center; outline: none; user-select: none;
         }
@@ -100,11 +110,11 @@
         .desplegable-contenido { padding-top: 10px; animation: desplegarFade 0.5s var(--curva-apple) forwards; }
         @keyframes desplegarFade { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* LISTAS MFL */
+        /* LISTAS MFL BASE EXCLUSIVA REGLAMENTO E HISTÓRICO */
         .lista-mfl { list-style: none; margin: 0 0 30px 0; padding-left: 0; max-width: 95%; }
         .lista-mfl li {
-            font-size: clamp(16px, 2.2vw, 20px); line-height: 1.6; color: var(--color-secundario);
-            font-weight: 500; margin-bottom: 8px; position: relative; padding-left: 28px;
+            font-size: var(--fuente-cuerpo); line-height: 1.6; color: var(--color-secundario);
+            font-weight: 500; margin-bottom: 8px; position: relative; padding-left: 32px;
         }
 
         .lista-mfl li::before {
@@ -118,13 +128,13 @@
             left: 6px;
         }
 
-        /* REGLAMENTO: NUMERACIÓN DE DOS RENGLONES */
+        /* REGLAMENTO: NUMERACIÓN FLOATING */
         .num-regla { font-size: 3.2em; font-weight: 800; float: left; line-height: 0.85; margin-right: 14px; margin-top: 4px; color: var(--color-texto); letter-spacing: -0.05em; }
 
-        footer { width: var(--ancho-bloque); margin: 0 auto; padding: 40px 0; font-size: 12px; font-weight: 500; color: var(--color-secundario); opacity: 0.6; border-top: 1px solid var(--borde); margin-top: 50px; }
+        footer { width: var(--ancho-bloque); margin: 0 auto; padding: 40px 0; font-size: 13px; font-weight: 500; color: var(--color-secundario); opacity: 0.6; border-top: 1px solid var(--borde); margin-top: 50px; }
 
         @media (max-width: 1024px) { .seccion { padding-top: 15vh; } }
-        @media (max-width: 768px) { .regla-bloque, .lista-mfl, h2 { max-width: 100%; } }
+        @media (max-width: 768px) { .regla-bloque, .lista-mfl, h2, .desplegable-contenido h2 { max-width: 100%; } }
         @media (max-width: 480px) { .seccion { padding-top: 12vh; } h1 { margin-bottom: 35px; } .regla-bloque { margin-bottom: 25px; } }
     </style>
 </head>
@@ -168,11 +178,11 @@
 
         <ul class="lista-mfl">
             <li data-pos="•">Con 5 jugadores se disputan 15 partidos totales (6 por jugador) a 5 minutos por tiempo.</li>
-            <li data-pos="2.">Con 6 jugadores se juega una liga única de todos contra todos a una sola vuelta, sumando 15 partidos a 4 minutos por tiempo.</li>
-            <li data-pos="3.">Con 7 jugadores se asignan 14 partidos totales (4 por jugador) a 5 minutos por tiempo.</li>
-            <li data-pos="4.">Con 8 jugadores se generan 16 partidos totales (4 por jugador) a 4 minutos por tiempo.</li>
-            <li data-pos="5.">Con 9 jugadores se disputan 18 partidos totales (4 por jugador) a 3 minutos por tiempo.</li>
-            <li data-pos="6.">Con 10 jugadores se desarrollan 15 partidos totales (3 por jugador) a 4 minutos por tiempo.</li>
+            <li data-pos="•">Con 6 jugadores se juega una liga única de todos contra todos a una sola vuelta, sumando 15 partidos a 4 minutos por tiempo.</li>
+            <li data-pos="•">Con 7 jugadores se asignan 14 partidos totales (4 por jugador) a 5 minutos por tiempo.</li>
+            <li data-pos="•">Con 8 jugadores se generan 16 partidos totales (4 por jugador) a 4 minutos por tiempo.</li>
+            <li data-pos="•">Con 9 jugadores se disputan 18 partidos totales (4 por jugador) a 3 minutos por tiempo.</li>
+            <li data-pos="•">Con 10 jugadores se desarrollan 15 partidos totales (3 por jugador) a 4 minutos por tiempo.</li>
         </ul>
 
         <p class="regla-bloque"><span class="num-regla">05.</span>Si dos o más participantes igualan en puntos al finalizar una edición, las posiciones se definen strictly bajo el orden de diferencia de goles, goles a favor y goles en contra. De persistir la igualdad, se consideran las tarjetas amarillas, tarjetas rojas y las faltas cometidas en el torneo. En el caso extremo de un empate absoluto en todas las estadísticas, se disputará un partido de desempate con prórroga y tanda de penales si fuera necesario.</p>
