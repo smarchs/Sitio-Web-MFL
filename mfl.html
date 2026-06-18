@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M.A.F.I.A. League ™</title>
+    <style>
+        :root {
+            --bg-base: #ffffff;
+            --bg-gradiente: radial-gradient(circle at 50% -20%, #ffffff 0%, #f5f5f7 65%, #e8e8ed 100%);
+            --bg-header: rgba(255, 255, 255, 0.8);
+            --borde: rgba(0, 0, 0, 0.08);
+            --color-texto: #1d1d1f;
+            --color-secundario: #86868b;
+            --fuente: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+            --ancho-bloque: 90%;
+            --curva-apple: cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-base: #000000;
+                --bg-gradiente: radial-gradient(circle at 50% -20%, #1c1c1e 0%, #070708 55%, #000000 100%);
+                --bg-header: rgba(0, 0, 0, 0.8);
+                --borde: rgba(255, 255, 255, 0.08);
+                --color-texto: #f5f5f7;
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--fuente); background-color: var(--bg-base); background-image: var(--bg-gradiente);
+            background-attachment: fixed; color: var(--color-texto); letter-spacing: -0.025em;
+            -webkit-font-smoothing: antialiased; min-height: 100vh; display: flex; flex-direction: column;
+        }
+
+        /* HEADER */
+        header {
+            position: fixed; top: 0; left: 0; width: 100%; height: 52px;
+            padding: 0 calc((100% - var(--ancho-bloque)) / 2);
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 5000; background: var(--bg-header); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--borde);
+        }
+
+        .logo { font-size: 15px; font-weight: 600; text-decoration: none; color: var(--color-texto); }
+        .menu-toggle { background: none; border: none; color: var(--color-texto); font-size: 14px; cursor: pointer; opacity: 0.8; transition: opacity 0.3s var(--curva-apple); }
+
+        /* MENÚ DESPLEGABLE */
+        .menu-desplegable {
+            position: fixed; top: 52px; left: 0; width: 100%; height: calc(100vh - 52px);
+            background: inherit; z-index: 4000; display: flex; align-items: center;
+            padding: 0 calc((100% - var(--ancho-bloque)) / 2);
+            opacity: 0; pointer-events: none; transform: scale(1.02) translateY(-10px);
+            transition: opacity 0.5s var(--curva-apple), transform 0.5s var(--curva-apple);
+        }
+        .menu-desplegable.active { opacity: 1; pointer-events: auto; transform: scale(1) translateY(0); }
+        .menu-desplegable ul { list-style: none; width: 100%; }
+        .menu-desplegable ul li { margin-bottom: 3.5vh; opacity: 0; transform: translateY(15px); transition: 0.5s var(--curva-apple); }
+        .menu-desplegable.active ul li { opacity: 1; transform: translateY(0); }
+        .menu-desplegable ul li a { font-size: clamp(32px, 6.5vw, 60px); font-weight: 700; color: var(--color-texto); text-decoration: none; opacity: 0.35; transition: opacity 0.3s var(--curva-apple); }
+        .menu-desplegable ul li a:hover { opacity: 1; transform: translateX(4px); }
+
+        /* SISTEMA DE SECCIONES (TABS) */
+        .seccion { display: none; width: var(--ancho-bloque); margin: 0 auto; padding-top: 18vh; flex-grow: 1; opacity: 0; transform: translateY(20px); }
+        .seccion.active { display: flex; flex-direction: column; justify-content: flex-start; animation: appleFadeIn 0.8s var(--curva-apple) forwards; }
+        @keyframes appleFadeIn { to { opacity: 1; transform: translateY(0); } }
+
+        /* TIPOGRAFÍA EDITORIAL */
+        h1 { font-size: clamp(44px, 9vw, 92px); font-weight: 800; letter-spacing: -0.05em; line-height: 1.05; margin-bottom: 50px; }
+        h1 span { font-size: 0.38em; vertical-align: super; font-weight: 600; }
+        h2 { font-size: clamp(22px, 3.5vw, 30px); font-weight: 700; color: var(--color-texto); letter-spacing: -0.03em; margin: 30px 0 10px 0; }
+        
+        /* Control estricto de bordes superiores de inicio de pestaña */
+        #reglamento > p:first-of-type, #premios > h2:first-of-type, #temporadas > h2:first-of-type, #historico > h2:first-of-type, #eventos > h2:first-of-type { border-top: 1px solid var(--borde); padding-top: 45px; margin-top: 0; margin-bottom: 20px; }
+        #premios h2:not(:first-of-type), #historico h2:not(:first-of-type), #eventos h2:not(:first-of-type) { border-top: 1px solid var(--borde); padding-top: 30px; margin-top: 35px; margin-bottom: 20px; }
+        
+        /* Bloques contenedores de temporadas */
+        .bloque-temporada-anterior { border-top: 1px solid var(--borde); margin-top: 40px; padding-top: 25px; }
+        .bloque-temporada-actual h2, .bloque-temporada-anterior h2 { margin-top: 10px; }
+        .desplegable-contenido > h2:first-of-type { margin-top: 5px; }
+        
+        .regla-bloque { font-size: clamp(18px, 2.5vw, 24px); line-height: 1.55; color: var(--color-secundario); font-weight: 500; letter-spacing: -0.02em; margin-bottom: 25px; max-width: 95%; text-align: justify; }
+        .manifiesto-portada { font-size: clamp(22px, 3.8vw, 40px); line-height: 1.38; border-top: 1px solid var(--borde); padding-top: 45px; color: var(--color-secundario); font-weight: 500; letter-spacing: -0.035em; }
+
+        /* INTERFAZ DESPLEGABLE NATIVA */
+        details { margin: 5px 0; width: 100%; }
+        summary {
+            font-size: clamp(16px, 2.5vw, 20px); font-weight: 600; color: var(--color-secundario);
+            text-transform: uppercase; letter-spacing: 0.05em; padding: 12px 0;
+            cursor: pointer; list-style: none; display: flex; align-items: center; outline: none; user-select: none;
+        }
+        summary::-webkit-details-marker { display: none; }
+        summary::after {
+            content: "→"; font-size: 0.8em; margin-left: 12px; color: var(--color-secundario); opacity: 0.5;
+            transition: transform 0.4s var(--curva-apple);
+        }
+        details[open] summary::after { transform: rotate(90deg); }
+        .desplegable-contenido { padding-top: 10px; animation: desplegarFade 0.5s var(--curva-apple) forwards; }
+        @keyframes desplegarFade { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* LISTAS MFL */
+        .lista-mfl { list-style: none; margin: 0 0 30px 0; padding-left: 0; max-width: 95%; }
+        .lista-mfl li {
+            font-size: clamp(16px, 2.2vw, 20px); line-height: 1.6; color: var(--color-secundario);
+            font-weight: 500; margin-bottom: 8px; position: relative; padding-left: 28px;
+        }
+
+        .lista-mfl li::before {
+            content: attr(data-pos);
+            position: absolute; left: 4px;
+            color: var(--color-texto);
+            font-weight: 400;
+        }
+        .lista-mfl li[data-pos="•"]::before {
+            font-weight: 700;
+            left: 6px;
+        }
+
+        /* REGLAMENTO: NUMERACIÓN DE DOS RENGLONES */
+        .num-regla { font-size: 3.2em; font-weight: 800; float: left; line-height: 0.85; margin-right: 14px; margin-top: 4px; color: var(--color-texto); letter-spacing: -0.05em; }
+
+        footer { width: var(--ancho-bloque); margin: 0 auto; padding: 40px 0; font-size: 12px; font-weight: 500; color: var(--color-secundario); opacity: 0.6; border-top: 1px solid var(--borde); margin-top: 50px; }
+
+        @media (max-width: 1024px) { .seccion { padding-top: 15vh; } }
+        @media (max-width: 768px) { .regla-bloque, .lista-mfl, h2 { max-width: 100%; } }
+        @media (max-width: 480px) { .seccion { padding-top: 12vh; } h1 { margin-bottom: 35px; } .regla-bloque { margin-bottom: 25px; } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="#" class="logo" onclick="navegar('inicio')">MFL™</a>
+        <button class="menu-toggle" id="menuBtn" onclick="toggleMenu()">Menú</button>
+    </header>
+
+    <div class="menu-desplegable" id="menuNav">
+        <nav style="width: 100%;">
+            <ul>
+                <li style="--i:1"><a href="#" onclick="navegar('inicio')">Inicio</a></li>
+                <li style="--i:2"><a href="#" onclick="navegar('reglamento')">Reglamento</a></li>
+                <li style="--i:3"><a href="#" onclick="navegar('eventos')">Eventos</a></li>
+                <li style="--i:4"><a href="#" onclick="navegar('premios')">Premios</a></li>
+                <li style="--i:5"><a href="#" onclick="navegar('temporadas')">Temporadas</a></li>
+                <li style="--i:6"><a href="#" onclick="navegar('historico')">Histórico</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <main id="inicio" class="seccion active">
+        <h1>M.A.F.I.A. League<span>™</span></h1>
+        <p class="manifiesto-portada">
+            Plataforma oficial de gestión, seguimiento y análisis para la MFL™, un torneo dinámico de fútbol virtual organizado por The Mostly Awesome Football International Association.
+        </p>
+    </main>
+
+    <main id="reglamento" class="seccion">
+        <h1>Reglamento MFL<span>™</span></h1>
+        
+        <p class="regla-bloque"><span class="num-regla">01.</span>El torneo se organiza en temporadas divididas en ediciones de temática variable a lo largo del año. Para cada edición se confecciona una tabla de posiciones específica donde el ganador se lleva tantos puntos como participantes jueguen esa fecha; por ejemplo, en una edición de 10 jugadores, el primero suma 10 puntos. El último clasificado siempre obtiene 1 punto y el resto escala de forma proporcional. En paralelo, la Tabla General de la temporada acumula la sumatoria de los puntos obtenidos en cada edición para definir al campeón absoluto.</p>
+
+        <p class="regla-bloque"><span class="num-regla">02.</span>Cada edición requiere un mínimo de 5 participantes para ser contabilizada de manera oficial y tiene un cupo máximo estricto de 10 jugadores. Si asisten 4 o menos no computa para la Tabla General. El sistema de inscripción se rige bajo la premisa de orden de llegada: los primeros 10 miembros del grupo en confirmar su asistencia aseguran su plaza. Todo jugador debe permanecer durante toda la jornada; en caso de retiro anticipado o llegada tardía que impida disputar los cruces, los partidos faltantes se computarán como derrotas automáticas por un resultado de 3-0. Asimismo, el participante que confirme su asistencia y no se presente a la jornada sufrirá una penalización directa de 3 puntos en la Tabla General de la temporada.</p>
+
+        <p class="regla-bloque"><span class="num-regla">03.</span>La asignación se realiza considerando la temática de la edición mediante un sistema de doble transparencia. En primer lugar, se utiliza una ruleta con los nombres de los jugadores presentes para determinar el orden de elección. Siguiendo ese orden establecido, cada participante gira una segunda ruleta con los equipos previamente seleccionados para obtener el suyo. Una vez asignado el equipo no se permiten cambios bajo ninguna circunstancia para garantizar la equidad de la competencia.</p>
+
+        <p class="regla-bloque"><span class="num-regla">04.</span>Los encuentros otorgan 3 puntos por victoria, 1 por empate y 0 por derrota, definiéndose la localía mediante piedra, papel o tijera antes de empezar. En caso de repetir cruce, se juega obligatoriamente un partido de local y otro de visitante. El formato de la competencia y la duración de los tiempos se autocalibran según la asistencia para asegurar que la jornada presencial no supere las 3 horas totales, distribuyéndose de la siguiente manera:</p>
+
+        <ul class="lista-mfl">
+            <li data-pos="•">Con 5 jugadores se disputan 15 partidos totales (6 por jugador) a 5 minutos por tiempo.</li>
+            <li data-pos="2.">Con 6 jugadores se juega una liga única de todos contra todos a una sola vuelta, sumando 15 partidos a 4 minutos por tiempo.</li>
+            <li data-pos="3.">Con 7 jugadores se asignan 14 partidos totales (4 por jugador) a 5 minutos por tiempo.</li>
+            <li data-pos="4.">Con 8 jugadores se generan 16 partidos totales (4 por jugador) a 4 minutos por tiempo.</li>
+            <li data-pos="5.">Con 9 jugadores se disputan 18 partidos totales (4 por jugador) a 3 minutos por tiempo.</li>
+            <li data-pos="6.">Con 10 jugadores se desarrollan 15 partidos totales (3 por jugador) a 4 minutos por tiempo.</li>
+        </ul>
+
+        <p class="regla-bloque"><span class="num-regla">05.</span>Si dos o más participantes igualan en puntos al finalizar una edición, las posiciones se definen strictly bajo el orden de diferencia de goles, goles a favor y goles en contra. De persistir la igualdad, se consideran las tarjetas amarillas, tarjetas rojas y las faltas cometidas en el torneo. En el caso extremo de un empate absoluto en todas las estadísticas, se disputará un partido de desempate con prórroga y tanda de penales si fuera necesario.</p>
+
+        <p class="regla-bloque"><span class="num-regla">06.</span>Todos los jugadores deben mantener un comportamiento respetuoso y deportivo. Cualquier actitud antideportiva será evaluada por la organización y podrá ser sancionada con advertencias, quita de puntos, descalificación de la fecha o la expulsión directa del torneo. Las partidas se disputan bajo los parámetros predeterminados del juego sin ayudas externas de ningún tipo. Ante cualquier falla técnica irreversible o desconexión ajena a los jugadores durante un partido, el mismo se reiniciará desde cero.</p>
+    </main>
+
+    <main id="premios" class="seccion">
+        <h1>Premios MFL<span>™</span></h1>
+        
+        <h2>Primer, Segundo y Tercer Puesto</h2>
+        <p class="regla-bloque">Estos reconocimientos se otorgan a los jugadores que hayan obtenido los tres primeros lugares en la edición, en recognition a su destacada actuación y habilidad a lo largo de la competición.</p>
+        <ul class="lista-mfl">
+            <li data-pos="•">Consultar en la sección Temporadas.</li>
+        </ul>
+
+        <h2>Cristiano Ronaldo: Máximo Goleador</h2>
+        <p class="regla-bloque">Este galardón rinde homenaje a Cristiano Ronaldo, reconocido como el máximo goleador de la historia del fútbol profesional. Se otorga al jugador o jugadores que hayan anotado la mayor cantidad de goles en la edición, en reconocimiento a su capacidad goleadora, eficacia ofensiva y liderazgo dentro del campo de juego. Se entrega desde la edición 24x05.</p>
+        <details>
+            <summary>Ganadores</summary>
+            <div class="desplegable-contenido">
+                <ul class="lista-mfl">
+                    <li data-pos="1.">Elías Parra (24x05 • 24x06 • 25x06)</li>
+                    <li data-pos="2.">Renzo Gallegos (24x05 • 24x06 • 25x03)</li>
+                    <li data-pos="3.">Santiago Pereyra (24x05 • 25x01)</li>
+                    <li data-pos="4.">Emanuel Marqués (25x05)</li>
+                    <li data-pos="5.">Gonzalo Silva (25x04)</li>
+                    <li data-pos="6.">Agustín Marqués (25x02)</li>
+                    <li data-pos="7.">Fidel Parra (24x08)</li>
+                    <li data-pos="8.">Marcelo Silva (24x07)</li>
+                </ul>
+            </div>
+        </details>
+
+        <h2>Paolo Maldini: Mejor Defensa</h2>
+        <p class="regla-bloque">Este galardón rinde homenaje a Paolo Maldini, considerado uno de los mejores defensores de la historia del fútbol. Se otorga al jugador o jugadores con menor cantidad de goles recibidos en la edición, en reconocimiento a su solidez defensiva, disciplina táctica y capacidad para proteger a su equipo. Se entrega desde la edición 24x05.</p>
+        <details>
+            <summary>Ganadores</summary>
+            <div class="desplegable-contenido">
+                <ul class="lista-mfl">
+                    <li data-pos="1.">Elías Parra (24x05 • 24x07 • 25x04 • 25x06)</li>
+                    <li data-pos="2.">Marcelo Silva (24x05 • 24x08 • 25x07)</li>
+                    <li data-pos="3.">Santiago Pereyra (25x01 • 25x04)</li>
+                    <li data-pos="4.">Emanuel Marqués (25x05)</li>
+                    <li data-pos="5.">Franco Aguirre (25x03)</li>
+                    <li data-pos="6.">Agustín Marqués (25x02)</li>
+                    <li data-pos="7.">Fidel Parra (24x07)</li>
+                    <li data-pos="8.">Renzo Gallegos (24x06)</li>
+                </ul>
+            </div>
+        </details>
+
+        <h2>Ronaldinho: Mejor Gol</h2>
+        <p class="regla-bloque">Este galardón rinde homenaje a Ronaldinho, reconocido como uno de los futbolistas más creativos, talentosos y espectaculares de todos los tiempos. Se otorga al jugador que haya anotado el gol más destacado de la edición, ya sea por su belleza, dificultad técnica o importancia en el desarrollo del torneo. Se entrega desde la edición 24x06.</p>
+        <details>
+            <summary>Ganadores</summary>
+            <div class="desplegable-contenido">
+                <ul class="lista-mfl">
+                    <li data-pos="1.">Agustín Marqués (25x02 • 25x06)</li>
+                    <li data-pos="2.">Fidel Parra (24x07 • 25x03)</li>
+                    <li data-pos="3.">Renzo Gallegos (24x06 • 25x01)</li>
+                    <li data-pos="4.">Benjamín Márquez (25x05)</li>
+                    <li data-pos="5.">Gonzalo Silva (25x04)</li>
+                    <li data-pos="6.">Emanuel Martínez (24x08)</li>
+                </ul>
+            </div>
+        </details>
+
+        <h2>Johan Cruyff: Reconocimiento Especial</h2>
+        <p class="regla-bloque">Este reconocimiento rinde homenaje a Johan Cruyff, máximo exponente del fútbol total y ampliamente reconocido como uno de los futbolistas más completos de la historia. Se otorga una sola vez por temporada al jugador que haya demostrado un desempeño excepcional en todas las facetas del juego, destacándose tanto en ataque como en defensa, y ser el primero en obtener todos los premios posibles.</p>
+        <details>
+            <summary>Ganadores</summary>
+            <div class="desplegable-contenido">
+                <ul class="lista-mfl">
+                    <li data-pos="1.">Agustín Marqués (Temporada 2025)</li>
+                    <li data-pos="2.">Renzo Gallegos (Temporada 2024)</li>
+                </ul>
+            </div>
+        </details>
+    </main>
+
+    <main id="temporadas" class="seccion">
+        <h1>Temporadas MFL<span>™</span></h1>
+        
+        <div class="bloque-temporada-actual">
+            <h2>Temporada 2025</h2>
+            
+            <details>
+                <summary>Ediciones</summary>
+                <div class="desplegable-contenido">
+                    <h2>Primera Edición (25x01)</h2>
+                    <ul class="lista-mfl">
+                        <li data-pos="1.">Santiago Pereyra – 7 puntos</li>
+                        <li data-pos="2.">Marcelo Silva – 6 puntos</li>
+                        <li data-pos="3.">Renzo Gallegos – 5 puntos</li>
+                        <li data-pos="4.">Elías Parra – 4 puntos</li>
+                        <li data-pos="5.">Emanuel Martínez – 3 puntos</li>
+                        <li data-pos="6.">Máximo Bautista – 2 puntos</li>
+                        <li data-pos="7.">Renzo Gallegos – 1 punto</li>
+                    </ul>
+
+                    <h2>Segunda Edición (25x02)</h2>
+                    <ul class="lista-mfl">
+                        <li data-pos="1.">Agustín Marqués – 12 puntos</li>
+                        <li data-pos="2.">Máximo Bautista – 11 puntos</li>
+                        <li data-pos="3.">Emanuel Marqués – 10 puntos</li>
+                        <li data-pos="4.">Gonzalo Silva – 9 puntos</li>
+                        <li data-pos="5.">Elías Parra – 8 puntos</li>
+                        <li data-pos="6.">Fidel Parra – 7 puntos</li>
+                        <li data-pos="7.">Marcelo Silva – 6 puntos</li>
+                        <li data-pos="8.">Emanuel Martínez – 5 puntos</li>
+                        <li data-pos="9.">Frank Rauchenberger – 4 puntos</li>
+                        <li data-pos="10.">Santiago Pereyra – 3 puntos</li>
+                        <li data-pos="11.">Renzo Gallegos – 2 puntos</li>
+                        <li data-pos="12.">Julián Benegas – 1 punto</li>
+                    </ul>
+
+                    <h2>Tercera Edición (25x03)</h2>
+                    <ul class="lista-mfl">
+                        <li data-pos="1.">Renzo Gallegos – 11 puntos</li>
+                        <li data-pos="2.">Agustín Marqués – 10 puntos</li>
+                        <li data-pos="3.">Emanuel Marqués – 9 puntos</li>
+                        <li data-pos="4.">Marcelo Silva – 8 puntos</li>
+                        <li data-pos="5.">Benjamín Márquez – 7 puntos</li>
+                        <li data-pos="6.">Franco Aguirre – 6 puntos</li>
+                        <li data-pos="7.">Santiago Pereyra – 5 puntos</li>
+                        <li data-pos="8.">Elías Parra – 4 puntos</li>
+                        <li data-pos="9.">Máximo Bautista – 3 puntos</li>
+                        <li data-pos="10.">Fidel Parra – 2 puntos</li>
+                        <li data-pos="11.">Mariano Miranda – 1 punto</li>
+                    </ul>
+
+                    <h2>Cuarta Edición (25x04)</h2>
+                    <ul class="lista-mfl">
+                        <li data-pos="1.">Gonzalo Silva – 8 puntos</li>
+                        <li data-pos="2.">Santiago Pereyra – 7 puntos</li>
+                        <li data-pos="3.">Marcelo Silva – 6 puntos</li>
+                        <li data-pos="4.">Elías Parra – 5 puntos</li>
+                        <li data-pos="5.">Emanuel Martínez – 4 puntos</li>
+                        <li data-pos="6.">Renzo Gallegos – 3 puntos</li>
+                        <li data-pos="7.">Fidel Parra – 2 puntos</li>
+                        <li data-pos="8.">Máximo Bautista – 1 punto</li>
+                    </ul>
+
+                    <h2>Quinta Edición (25x05)</h2>
+                    <ul class="lista-mfl">
+                        <li data-pos="1.">Emanuel Marqués – 8 puntos</li>
+                        <li data-pos="2.">Gonzalo Silva – 7 puntos</li>
+                        <li data-pos="3.">Agustín Marqués – 6 puntos</li>
+                        <li data-pos="4.">Benjamín Márquez – 5 puntos</li>
+                        <li data-pos="5.">Marcelo Silva – 4 puntos</li>
+                        <li data-pos="6.">Santiago Pereyra – 3 puntos</li>
+                        <li data-pos="7.">Renzo Gallegos – 2 puntos</li>
+                        <li data-pos="8.">Tobías Márquez – 1 punto</li>
+                    </ul>
+
+                    <h2>Sexta Edición (25x06)</h2>
+                    <ul class="lista-mfl">
+                        <li data-pos="1.">Elías Parra – 8 puntos</li>
+                        <li data-pos="2.">Marcelo Silva – 7 puntos</li>
+                        <li data-pos="3.">Gonzalo Silva – 6 puntos</li>
+                        <li data-pos="4.">Benjamín Márquez – 5 puntos</li>
+                        <li data-pos="5.">Agustín Marqués – 4 puntos</li>
+                        <li data-pos="6.">Emanuel Marqués – 3 puntos</li>
+                        <li data-pos="7.">Fidel Parra – 2 puntos</li>
+                        <li data-pos="8.">Máximo Bautista – 1 punto</li>
+                    </ul>
+
+                    <h2>Séptima Edición (25x07)</h2>
+                    <ul class="lista-mfl">
+                        <li data-pos="1.">Elías Parra – 5 puntos</li>
+                        <li data-pos="2.">Marcelo Silva – 4 puntos</li>
+                        <li data-pos="3.">Gonzalo Silva – 3 puntos</li>
+                        <li data-pos="4.">Santiago Pereyra – 2 puntos</li>
+                        <li data-pos="5.">Fidel Parra – 1 punto</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>Rankings</summary>
+                <div class="desplegable-contenido">
+                    <h2>Tabla General por Puntaje</h2>
+                    <ul class="lista-mfl">
+                        <li data-pos="1.">Marcelo Silva – 41 puntos</li>
+                        <li data-pos="2.">Elías Parra – 34 puntos</li>
+                        <li data-pos="3.">Gonzalo Silva – 33 puntos</li>
+                        <li data-pos="4.">Agustín Marqués – 32 puntos</li>
+                        <li data-pos="5.">Emanuel Marqués – 30 puntos</li>
+                        <li data-pos="6.">Santiago Pereyra – 27 puntos</li>
+                        <li data-pos="7.">Renzo Gallegos – 24 puntos</li>
+                        <li data-pos="8.">Máximo Bautista – 18 puntos</li>
+                        <li data-pos="9.">Benjamín Márquez – 17 puntos</li>
+                        <li data-pos="10.">Emanuel Martínez – 17 puntos</li>
+                        <li data-pos="11.">Fidel Parra – 14 puntos</li>
+                        <li data-pos="12.">Franco Aguirre – 6 puntos</li>
+                        <li data-pos="13.">Frank Rauchenberger – 4 puntos</li>
+                        <li data-pos="14.">Julián Benegas – 1 punto</li>
+                        <li data-pos="15.">Mariano Miranda – 1 punto</li>
+                        <li data-pos="16.">Tobías Márquez – 1 punto</li>
+                    </ul>
+
+                    <h2>Tabla General por Promedio</h2>
+                    <ul class="lista-mfl">
+                        <li data-pos="1.">Agustín Marqués – 4 ediciones – 8 puntos</li>
+                        <li data-pos="2.">Emanuel Marqués – 4 ediciones – 7,5 puntos</li>
+                        <li data-pos="3.">Gonzalo Silva – 5 ediciones – 6,6 puntos</li>
+                        <li data-pos="4.">Franco Aguirre – 1 edición – 6 puntos</li>
+                        <li data-pos="5.">Marcelo Silva – 7 ediciones – 5,8 puntos</li>
+                        <li data-pos="6.">Benjamín Márquez – 3 ediciones – 5,7 puntos</li>
+                        <li data-pos="7.">Elías Parra – 6 ediciones – 5,6 puntos</li>
+                        <li data-pos="8.">Santiago Pereyra – 5 ediciones – 5,4 puntos</li>
+                        <li data-pos="9.">Renzo Gallegos – 5 ediciones – 4,8 puntos</li>
+                        <li data-pos="10.">Emanuel Martínez – 4 ediciones – 4,3 puntos</li>
+                        <li data-pos="11.">Frank Rauchenberger – 1 edición – 4 puntos</li>
+                        <li data-pos="12.">Máximo Bautista – 5 ediciones – 3,6 puntos</li>
+                        <li data-pos="13.">Fidel Parra – 5 ediciones – 2,8 puntos</li>
+                        <li data-pos="14.">Julián Benegas – 1 edición – 1 punto</li>
+                        <li data-pos="15.">Mariano Miranda – 1 edición – 1 punto</li>
+                        <li data-pos="16.">Tobías Márquez – 1 edición – 1 punto</li>
+                    </ul>
+                </div>
+            </details>
+        </div>
+
+        <div class="bloque-temporada-anterior">
+            <h2>Temporada 2024</h2>
+            
+            <details>
+                <summary>Ediciones</summary>
+                <div class="desplegable-contenido">
+                    <h2>Primera Edición (24x01)</h2>
+                    <ul class="lista-mfl">
+                        <li data-pos="1.">Santiago Pereyra – 6 puntos</li>
+                        <li data-pos="2.">Marcelo Silva – 5 puntos</li>
+                        <li data-pos="3.">Gonzalo Silva – 4 puntos</li>
+                        <li data-pos="4.">Elías Parra – 3 puntos</li>
+                        <li data-pos="5.">Renzo Gallegos – 2 puntos</li>
+                        <li data-pos="6.">Emanuel Martínez – 1 punto</li>
+                    </ul>
+
+                    <h2>Segunda Edición (24x02)</h2>
+                    <ul class="lista-mfl">
+                        <li data-pos="1.">Marcelo Silva – 6 puntos</li>
+                        <li data-pos="2.">Gonzalo Silva – 5 puntos</li>
+                        <li data-pos="3.">Renzo Gallegos – 4 puntos</li>
+                        <li data-pos="4.">Elías Parra – 3 puntos</li>
+                        <li data-pos="5.">Emanuel Martínez – 2 puntos</li>
+                        <li data-pos="6.">Santiago Pereyra – 1 punto</li>
+                    </ul>
+
+                    <h2>Tercera Edición (24x03)</h2>
+                    <ul class="lista-mfl">
+                        <li data-pos="1.">Marcelo Silva – 5 puntos</li>
+                        <li data-pos="2.">Elías Parra – 4 puntos</li>
+                        <li data-pos="3.">Emanuel Martínez – 3 puntos</li>
+                        <li data-pos="4.">Gonzalo Silva – 2 puntos</li>
+                        <li data-pos="5.">Fidel Parra – 1 punto</li>
+                    </ul>
+
+                    <h2>Cuarta Edición (24x04)</h2>
+                    <ul class="lista-mfl">
+                        <li data-pos="1.">Elías Parra – 8 puntos</li>
+                        <li data-pos="2.">Marcelo Silva – 7 puntos</li>
+                        <li data-pos="3.">Gonzalo Silva – 6 puntos</li>
+                        <li data-pos="4.">Emanuel Martínez – 5 puntos</li>
+                        <li data-pos="5.">Fidel Parra – 4 puntos</li>
+                        <li data-pos="6.">Santiago Pereyra – 3 puntos</li>
+                        <li data-pos="7.">Renzo Gallegos – 2 puntos</li>
+                        <li data-pos="8.">Valentín Roldán – 1 punto</li>
+                    </ul>
+
+                    <h2>Quinta Edición (24x05)</h2>
+                    <ul class="lista-mfl">
+                        <li data-pos="1.">Elías Parra – 7 puntos</li>
+                        <li data-pos="2.">Renzo Gallegos – 6 puntos</li>
+                        <li data-pos="3.">Marcelo Silva – 5 puntos</li>
+                        <li data-pos="4.">Santiago Pereyra – 4 puntos</li>
+                        <li data-pos="5.">Gonzalo Silva – 3 puntos</li>
+                        <li data-pos="6.">Fidel Parra – 2 puntos</li>
+                        <li data-pos="7.">Emanuel Martínez – 1 punto</li>
+                    </ul>
+
+                    <h2>Sexta Edición (24x06)</h2>
+                    <ul class="lista-mfl">
+                        <li data-pos="1.">Renzo Gallegos – 7 puntos</li>
+                        <li data-pos="2.">Marcelo Silva – 6 puntos</li>
+                        <li data-pos="3.">Elías Parra – 5 puntos</li>
+                        <li data-pos="4.">Santiago Pereyra – 4 puntos</li>
+                        <li data-pos="5.">Tomás Donati – 3 puntos</li>
+                        <li data-pos="6.">Fidel Parra – 2 puntos</li>
+                        <li data-pos="7.">Máximo Bautista – 1 punto</li>
+                    </ul>
+
+                    <h2>Séptima Edición (24x07)</h2>
+                    <ul class="lista-mfl">
+                        <li data-pos="1.">Fidel Parra – 8 puntos</li>
+                        <li data-pos="2.">Marcelo Silva – 7 puntos</li>
+                        <li data-pos="3.">Gonzalo Silva – 6 puntos</li>
+                        <li data-pos="4.">Emanuel Martínez – 5 puntos</li>
+                        <li data-pos="5.">Elías Parra – 4 puntos</li>
+                        <li data-pos="6.">Santiago Pereyra – 3 puntos</li>
+                        <li data-pos="7.">Renzo Gallegos – 2 puntos</li>
+                        <li data-pos="8.">Máximo Bautista – 1 punto</li>
+                    </ul>
+
+                    <h2>Octava Edición (24x08)</h2>
+                    <ul class="lista-mfl">
+                        <li data-pos="1.">Marcelo Silva – 7 puntos</li>
+                        <li data-pos="2.">Gonzalo Silva – 6 puntos</li>
+                        <li data-pos="3.">Elías Parra – 5 puntos</li>
+                        <li data-pos="4.">Fidel Parra – 4 puntos</li>
+                        <li data-pos="5.">Tomás Donati – 3 puntos</li>
+                        <li data-pos="6.">Máximo Bautista – 2 puntos</li>
+                        <li data-pos="7.">Emanuel Martínez – 1 punto</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>Rankings</summary>
+                <div class="desplegable-contenido">
+                    <h2>Tabla General por Puntaje</h2>
+                    <ul class="lista-mfl">
+                        <li data-pos="1.">Marcelo Silva – 48 puntos</li>
+                        <li data-pos="2.">Elías Parra – 39 puntos</li>
+                        <li data-pos="3.">Gonzalo Silva – 32 puntos</li>
+                        <li data-pos="4.">Renzo Gallegos – 22 puntos</li>
+                        <li data-pos="5.">Fidel Parra – 21 puntos</li>
+                        <li data-pos="6.">Santiago Pereyra – 21 puntos</li>
+                        <li data-pos="7.">Emanuel Martínez – 18 puntos</li>
+                        <li data-pos="8.">Tomás Donati – 6 puntos</li>
+                        <li data-pos="9.">Máximo Bautista – 4 puntos</li>
+                        <li data-pos="10.">Valentín Roldán – 1 punto</li>
+                    </ul>
+
+                    <h2>Tabla General por Promedio</h2>
+                    <ul class="lista-mfl">
+                        <li data-pos="1.">Marcelo Silva – 8 ediciones – 6 puntos</li>
+                        <li data-pos="2.">Elías Parra – 8 ediciones – 4,9 puntos</li>
+                        <li data-pos="3.">Gonzalo Silva – 7 ediciones – 4,6 puntos</li>
+                        <li data-pos="4.">Renzo Gallegos – 6 ediciones – 3,7 puntos</li>
+                        <li data-pos="5.">Fidel Parra – 6 ediciones – 3,5 puntos</li>
+                        <li data-pos="6.">Santiago Pereyra – 6 ediciones – 3,5 puntos</li>
+                        <li data-pos="7.">Tomás Donati – 2 ediciones – 3 puntos</li>
+                        <li data-pos="8.">Emanuel Martínez – 7 ediciones – 2,6 puntos</li>
+                        <li data-pos="9.">Máximo Bautista – 3 ediciones – 1,3 puntos</li>
+                        <li data-pos="10.">Valentín Roldán – 1 edición – 1 punto</li>
+                    </ul>
+                </div>
+            </details>
+        </div>
+    </main>
+
+    <main id="eventos" class="seccion">
+        <h1>Eventos MFL<span>™</span></h1>
+        <h2>Próxima Edición</h2>
+        <ul class="lista-mfl">
+            <li data-pos="•"><strong>Fecha:</strong> Viernes 10 de Julio de 2026</li>
+            <li data-pos="•"><strong>Edición:</strong> Primera Edición (26x01)</li>
+            <li data-pos="•"><strong>Temática:</strong> Pendiente de confirmación</li>
+            <li data-pos="•"><strong>Ubicación:</strong> Pendiente de confirmación</li>
+        </ul>
+    </main>
+
+    <main id="historico" class="seccion">
+        <h1>Histórico MFL<span>™</span></h1>
+        
+        <h2>Tabla General Histórica por Puntaje</h2>
+        <ul class="lista-mfl">
+            <li data-pos="1.">Marcelo Silva – 89 puntos</li>
+            <li data-pos="2.">Elías Parra – 73 puntos</li>
+            <li data-pos="3.">Gonzalo Silva – 65 puntos</li>
+            <li data-pos="4.">Santiago Pereyra – 48 puntos</li>
+            <li data-pos="5.">Renzo Gallegos – 46 puntos</li>
+            <li data-pos="6.">Fidel Parra – 35 puntos</li>
+            <li data-pos="7.">Emanuel Martínez – 35 puntos</li>
+            <li data-pos="8.">Agustín Marqués – 32 puntos</li>
+            <li data-pos="9.">Emanuel Marqués – 30 puntos</li>
+            <li data-pos="10.">Máximo Bautista – 22 puntos</li>
+            <li data-pos="11.">Benjamín Márquez – 17 puntos</li>
+            <li data-pos="12.">Tomás Donati – 6 puntos</li>
+            <li data-pos="13.">Franco Aguirre – 6 puntos</li>
+            <li data-pos="14.">Frank Rauchenberger – 4 puntos</li>
+            <li data-pos="15.">Valentín Roldán – 1 punto</li>
+            <li data-pos="16.">Julián Benegas – 1 punto</li>
+            <li data-pos="17.">Mariano Miranda – 1 punto</li>
+            <li data-pos="18.">Tobías Márquez – 1 punto</li>
+        </ul>
+
+        <h2>Tabla General Histórica por Promedio</h2>
+        <ul class="lista-mfl">
+            <li data-pos="1.">Agustín Marqués – 4 ediciones – 8 puntos</li>
+            <li data-pos="2.">Emanuel Marqués – 4 ediciones – 7,5 puntos</li>
+            <li data-pos="3.">Franco Aguirre – 1 edición – 6 puntos</li>
+            <li data-pos="4.">Marcelo Silva – 15 ediciones – 5,9 puntos</li>
+            <li data-pos="5.">Elías Parra – 14 ediciones – 5,2 puntos</li>
+            <li data-pos="6.">Gonzalo Silva – 12 ediciones – 5,4 puntos</li>
+            <li data-pos="7.">Santiago Pereyra – 11 ediciones – 4,4 puntos</li>
+            <li data-pos="8.">Frank Rauchenberger – 1 edición – 4 puntos</li>
+            <li data-pos="9.">Renzo Gallegos – 11 ediciones – 4,2 puntos</li>
+            <li data-pos="10.">Benjamín Márquez – 3 ediciones – 5,7 puntos</li>
+            <li data-pos="11.">Tomás Donati – 2 ediciones – 3 puntos</li>
+            <li data-pos="12.">Fidel Parra – 11 ediciones – 3,2 puntos</li>
+            <li data-pos="13.">Emanuel Martínez – 11 ediciones – 3,2 puntos</li>
+            <li data-pos="14.">Máximo Bautista – 8 ediciones – 2,8 puntos</li>
+            <li data-pos="15.">Valentín Roldán – 1 edición – 1 punto</li>
+            <li data-pos="16.">Julián Benegas – 1 edición – 1 punto</li>
+            <li data-pos="17.">Mariano Miranda – 1 edición – 1 punto</li>
+            <li data-pos="18.">Tobías Márquez – 1 edición – 1 punto</li>
+        </ul>
+    </main>
+
+    <footer>© 2026 • M.A.F.I.A. • smarchs STUDIOS</footer>
+
+    <script>
+        const menuBtn = document.getElementById('menuBtn');
+        const menuNav = document.getElementById('menuNav');
+
+        function toggleMenu() {
+            const active = menuNav.classList.toggle('active');
+            menuBtn.textContent = active ? 'Cerrar' : 'Menú';
+            document.body.style.overflow = active ? 'hidden' : 'auto';
+        }
+
+        function navegar(idSeccion) {
+            if(menuNav.classList.contains('active')) {
+                toggleMenu();
+            }
+            
+            document.querySelectorAll('.seccion').forEach(sec => {
+                sec.classList.remove('active');
+            });
+            
+            const seccionDestino = document.getElementById(idSeccion);
+            if(seccionDestino) {
+                seccionDestino.classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+    </script>
+</body>
+</html>
