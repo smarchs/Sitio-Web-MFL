@@ -88,7 +88,26 @@
         .desplegable-contenido > h2:first-of-type { margin-top: 5px; }
         
         .regla-bloque { font-size: var(--fuente-cuerpo); line-height: 1.55; color: var(--color-secundario); font-weight: 500; letter-spacing: -0.02em; margin-bottom: 25px; max-width: 95%; text-align: justify; }
-        .manifiesto-portada { font-size: clamp(24px, 3.8vw, 40px); line-height: 1.38; border-top: 1px solid var(--borde); padding-top: 45px; color: var(--color-secundario); font-weight: 500; letter-spacing: -0.035em; }
+        .manifiesto-portada { font-size: clamp(24px, 3.8vw, 40px); line-height: 1.38; border-top: 1px solid var(--borde); padding-top: 45px; color: var(--color-secundario); font-weight: 500; letter-spacing: -0.035em; margin-bottom: 40px; }
+
+        /* CONTENEDOR MULTIMEDIA RESPONSIVO (APPLE STYLE) */
+        .video-contenedor {
+            width: 100%;
+            max-width: 1120px;
+            margin: 0 auto 40px auto;
+            aspect-ratio: 16 / 9;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--borde);
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        .video-contenedor iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
 
         /* INTERFAZ DESPLEGABLE NATIVA */
         details { margin: 5px 0; width: 100%; }
@@ -106,14 +125,13 @@
         .desplegable-contenido { padding-top: 10px; animation: desplegarFade 0.5s var(--curva-apple) forwards; }
         @keyframes desplegarFade { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* LISTAS MFL ALINEADAS POR CUADRÍCULA ELÁSTICA SIMÉTRICA */
+        /* LISTAS MFL */
         .lista-mfl { list-style: none; margin: 0 0 30px 0; padding-left: 0; max-width: 95%; }
         .lista-mfl li {
             font-size: var(--fuente-cuerpo); line-height: 1.6; color: var(--color-secundario);
             font-weight: 500; margin-bottom: 8px; display: flex; align-items: flex-start;
         }
 
-        /* Contenedor elástico normalizado para evitar descalibración */
         .lista-mfl li::before {
             content: attr(data-pos);
             color: var(--color-texto);
@@ -130,7 +148,6 @@
             text-align: center;
         }
 
-        /* Forzado de espacio rígido horizontal después de los dos puntos */
         .lista-mfl li strong {
             margin-right: 8px;
             color: var(--color-texto);
@@ -170,6 +187,10 @@
         <p class="manifiesto-portada">
             Plataforma oficial de gestión, seguimiento y análisis para la MFL™, un torneo dinámico de fútbol virtual organizado por The Mostly Awesome Football International Association.
         </p>
+        
+        <div class="video-contenedor">
+            <iframe src="https://www.youtube.com/embed/cEF8H5GfrMw" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
+        </div>
     </main>
 
     <main id="reglamento" class="seccion">
@@ -259,7 +280,7 @@
         </details>
 
         <h2>Johan Cruyff: Reconocimiento Especial</h2>
-        <p class="regla-bloque">Este reconocimiento rinde homenaje a Johan Cruyff, máximo exponente del fútbol total y ampliamente reconocido como uno de los futbolistas más completos de la historia. Se otorga una sola vez por temporada al jugador que haya demostrado un desempeño excepcional en todas las facetas del juego, destacándose tanto en ataque como en defensa, y ser el primero en obtener todos los premios posibles.</p>
+        <p class="regla-bloque">Este reconocimiento rinde homenaje a Johan Cruyff, máximo exponente del fútbol total y ampliamente reconocido como uno de los futbolistas más completos de la historia. Se otorga una sola vez por temporada al jugador que haya demostrado un desempeño excepcional en todas las facetas del juego, destacándose tanto en ataque como en defense, y ser el primero en obtener todos los premios posibles.</p>
         <details>
             <summary>Ganadores</summary>
             <div class="desplegable-contenido">
