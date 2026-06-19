@@ -73,14 +73,11 @@
         .seccion.active { display: flex; flex-direction: column; justify-content: flex-start; animation: appleFadeIn 0.8s var(--curva-apple) forwards; }
         @keyframes appleFadeIn { to { opacity: 1; transform: translateY(0); } }
 
-        /* JERARQUÍA TIPOGRÁFICA REVISADA */
+        /* JERARQUÍA TIPOGRÁFICA */
         h1 { font-size: var(--fuente-h1); font-weight: 800; letter-spacing: -0.05em; line-height: 1.05; margin-bottom: 50px; }
         h1 span { font-size: 0.38em; vertical-align: super; font-weight: 600; }
         
-        /* Títulos de pestañas y bloques principales (Premios, Temporadas) */
         h2 { font-size: var(--fuente-titulo-seccion); font-weight: 700; color: var(--color-texto); letter-spacing: -0.03em; margin: 35px 0 15px 0; }
-        
-        /* Subtítulos dentro de desplegables (Ediciones específicas) */
         .desplegable-contenido h2 { font-size: var(--fuente-subtitulo); margin: 25px 0 10px 0; }
         
         #reglamento > p:first-of-type, #premios > h2:first-of-type, #temporadas > h2:first-of-type, #historico > h2:first-of-type, #eventos > h2:first-of-type { border-top: 1px solid var(--borde); padding-top: 45px; margin-top: 0; margin-bottom: 20px; }
@@ -90,7 +87,6 @@
         .bloque-temporada-actual h2, .bloque-temporada-anterior h2 { margin-top: 10px; }
         .desplegable-contenido > h2:first-of-type { margin-top: 5px; }
         
-        /* Bloque de texto base y Reglamento */
         .regla-bloque { font-size: var(--fuente-cuerpo); line-height: 1.55; color: var(--color-secundario); font-weight: 500; letter-spacing: -0.02em; margin-bottom: 25px; max-width: 95%; text-align: justify; }
         .manifiesto-portada { font-size: clamp(24px, 3.8vw, 40px); line-height: 1.38; border-top: 1px solid var(--borde); padding-top: 45px; color: var(--color-secundario); font-weight: 500; letter-spacing: -0.035em; }
 
@@ -110,25 +106,36 @@
         .desplegable-contenido { padding-top: 10px; animation: desplegarFade 0.5s var(--curva-apple) forwards; }
         @keyframes desplegarFade { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* LISTAS MFL BASE EXCLUSIVA REGLAMENTO E HISTÓRICO */
+        /* LISTAS MFL ALINEADAS POR CUADRÍCULA ELÁSTICA SIMÉTRICA */
         .lista-mfl { list-style: none; margin: 0 0 30px 0; padding-left: 0; max-width: 95%; }
         .lista-mfl li {
             font-size: var(--fuente-cuerpo); line-height: 1.6; color: var(--color-secundario);
-            font-weight: 500; margin-bottom: 8px; position: relative; padding-left: 32px;
+            font-weight: 500; margin-bottom: 8px; display: flex; align-items: flex-start;
         }
 
+        /* Contenedor elástico normalizado para evitar descalibración */
         .lista-mfl li::before {
             content: attr(data-pos);
-            position: absolute; left: 4px;
             color: var(--color-texto);
             font-weight: 400;
+            display: inline-block;
+            min-width: 2.5ch;
+            margin-right: 12px;
+            text-align: right;
+            flex-shrink: 0;
         }
+        
         .lista-mfl li[data-pos="•"]::before {
             font-weight: 700;
-            left: 6px;
+            text-align: center;
         }
 
-        /* REGLAMENTO: NUMERACIÓN FLOATING */
+        /* Forzado de espacio rígido horizontal después de los dos puntos */
+        .lista-mfl li strong {
+            margin-right: 8px;
+            color: var(--color-texto);
+        }
+
         .num-regla { font-size: 3.2em; font-weight: 800; float: left; line-height: 0.85; margin-right: 14px; margin-top: 4px; color: var(--color-texto); letter-spacing: -0.05em; }
 
         footer { width: var(--ancho-bloque); margin: 0 auto; padding: 40px 0; font-size: 13px; font-weight: 500; color: var(--color-secundario); opacity: 0.6; border-top: 1px solid var(--borde); margin-top: 50px; }
@@ -579,12 +586,12 @@
             <li data-pos="2.">Emanuel Marqués – 4 ediciones – 7,5 puntos</li>
             <li data-pos="3.">Franco Aguirre – 1 edición – 6 puntos</li>
             <li data-pos="4.">Marcelo Silva – 15 ediciones – 5,9 puntos</li>
-            <li data-pos="5.">Elías Parra – 14 ediciones – 5,2 puntos</li>
+            <li data-pos="5.">Benjamín Márquez – 3 ediciones – 5,7 puntos</li>
             <li data-pos="6.">Gonzalo Silva – 12 ediciones – 5,4 puntos</li>
-            <li data-pos="7.">Santiago Pereyra – 11 ediciones – 4,4 puntos</li>
-            <li data-pos="8.">Frank Rauchenberger – 1 edición – 4 puntos</li>
-            <li data-pos="9.">Renzo Gallegos – 11 ediciones – 4,2 puntos</li>
-            <li data-pos="10.">Benjamín Márquez – 3 ediciones – 5,7 puntos</li>
+            <li data-pos="7.">Elías Parra – 14 ediciones – 5,2 puntos</li>
+            <li data-pos="8.">Santiago Pereyra – 11 ediciones – 4,4 puntos</li>
+            <li data-pos="9.">Frank Rauchenberger – 1 edición – 4 puntos</li>
+            <li data-pos="10.">Renzo Gallegos – 11 ediciones – 4,2 puntos</li>
             <li data-pos="11.">Tomás Donati – 2 ediciones – 3 puntos</li>
             <li data-pos="12.">Fidel Parra – 11 ediciones – 3,2 puntos</li>
             <li data-pos="13.">Emanuel Martínez – 11 ediciones – 3,2 puntos</li>
