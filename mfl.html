@@ -125,13 +125,14 @@
         .desplegable-contenido { padding-top: 10px; animation: desplegarFade 0.5s var(--curva-apple) forwards; }
         @keyframes desplegarFade { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* LISTAS MFL */
+        /* LISTAS MFL ALINEADAS POR CUADRÍCULA ELÁSTICA SIMÉTRICA */
         .lista-mfl { list-style: none; margin: 0 0 30px 0; padding-left: 0; max-width: 95%; }
         .lista-mfl li {
             font-size: var(--fuente-cuerpo); line-height: 1.6; color: var(--color-secundario);
             font-weight: 500; margin-bottom: 8px; display: flex; align-items: flex-start;
         }
 
+        /* Contenedor elástico normalizado para evitar descalibración */
         .lista-mfl li::before {
             content: attr(data-pos);
             color: var(--color-texto);
@@ -148,6 +149,7 @@
             text-align: center;
         }
 
+        /* Forzado de espacio rígido horizontal después de los dos puntos */
         .lista-mfl li strong {
             margin-right: 8px;
             color: var(--color-texto);
@@ -182,17 +184,20 @@
         </nav>
     </div>
 
+    <!-- SECCIÓN: INICIO -->
     <main id="inicio" class="seccion active">
         <h1>M.A.F.I.A. League<span>™</span></h1>
         <p class="manifiesto-portada">
             Plataforma oficial de gestión, seguimiento y análisis para la MFL™, un torneo dinámico de fútbol virtual organizado por The Mostly Awesome Football International Association.
         </p>
         
+        <!-- REPRODUCTOR DE VIDEO ALINEADO A LA IZQUIERDA -->
         <div class="video-contenedor">
             <iframe src="https://www.youtube.com/embed/cEF8H5GfrMw" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
         </div>
     </main>
 
+    <!-- SECCIÓN: REGLAMENTO -->
     <main id="reglamento" class="seccion">
         <h1>Reglamento MFL<span>™</span></h1>
         
@@ -213,11 +218,12 @@
             <li data-pos="•">Con 10 jugadores se desarrollan 15 partidos totales (3 por jugador) a 4 minutos por tiempo.</li>
         </ul>
 
-        <p class="regla-bloque"><span class="num-regla">05.</span>Si dos o más participantes igualan en puntos al finalizar una edición, las posiciones se definen strictly bajo el orden of diferencia de goles, goles a favor y goles en contra. De persistir la igualdad, se consideran las tarjetas amarillas, tarjetas rojas y las faltas cometidas en el torneo. En el caso extremo de un empate absoluto en todas las estadísticas, se disputará un partido de desempate con prórroga y tanda de penales si fuera necesario.</p>
+        <p class="regla-bloque"><span class="num-regla">05.</span>Si dos o más participantes igualan en puntos al finalizar una edición, las posiciones se definen strictly bajo el orden de diferencia de goles, goles a favor y goles en contra. De persistir la igualdad, se consideran las tarjetas amarillas, tarjetas rojas y las faltas cometidas en el torneo. En el caso extremo de un empate absoluto en todas las estadísticas, se disputará un partido de desempate con prórroga y tanda de penales si fuera necesario.</p>
 
         <p class="regla-bloque"><span class="num-regla">06.</span>Todos los jugadores deben mantener un comportamiento respetuoso y deportivo. Cualquier actitud antideportiva será evaluada por la organización y podrá ser sancionada con advertencias, quita de puntos, descalificación de la fecha o la expulsión directa del torneo. Las partidas se disputan bajo los parámetros predeterminados del juego sin ayudas externas de ningún tipo. Ante cualquier falla técnica irreversible o desconexión ajena a los jugadores durante un partido, el mismo se reiniciará desde cero.</p>
     </main>
 
+    <!-- SECCIÓN: PREMIOS -->
     <main id="premios" class="seccion">
         <h1>Premios MFL<span>™</span></h1>
         
@@ -292,6 +298,7 @@
         </details>
     </main>
 
+    <!-- SECCIÓN: TEMPORADAS -->
     <main id="temporadas" class="seccion">
         <h1>Temporadas MFL<span>™</span></h1>
         
@@ -448,8 +455,7 @@
                         <li data-pos="2.">Marcelo Silva – 5 puntos</li>
                         <li data-pos="3.">Gonzalo Silva – 4 puntos</li>
                         <li data-pos="4.">Elías Parra – 3 puntos</li>
-                        <li data-pos="5.">Renzo Gallegos – 2 puntos</li>
-                        <li data-pos="6.">Emanuel Martínez – 1 punto</li>
+                        <li data-pos="5.">Emanuel Martínez – 1 punto</li>
                     </ul>
 
                     <h2>Segunda Edición (24x02)</h2>
@@ -565,17 +571,24 @@
         </div>
     </main>
 
+    <!-- SECCIÓN: EVENTOS -->
     <main id="eventos" class="seccion">
         <h1>Eventos MFL<span>™</span></h1>
         <h2>Próxima Edición</h2>
         <ul class="lista-mfl">
             <li data-pos="•"><strong>Fecha:</strong> Viernes 10 de Julio de 2026</li>
             <li data-pos="•"><strong>Edición:</strong> Primera Edición (26x01)</li>
-            <li data-pos="•"><strong>Temática:</strong> Pendiente de confirmación</li>
-            <li data-pos="•"><strong>Ubicación:</strong> Pendiente de confirmación</li>
+            <li data-pos="•"><strong>Temática:</strong> Clubes de Europa (Everton, Lazio, Lyon, O. Marseille, Roma)</li>
+            <li data-pos="•"><strong>Ubicación:</strong> Ver evento en la comunidad de WhatsApp</li>
         </ul>
+        
+        <!-- REPRODUCTOR DE VIDEO DE LA EDICIÓN -->
+        <div class="video-contenedor">
+            <iframe src="https://www.youtube.com/embed/B4399k3CY0k" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
+        </div>
     </main>
 
+    <!-- SECCIÓN: HISTÓRICO CONSOLIDADO -->
     <main id="historico" class="seccion">
         <h1>Histórico MFL<span>™</span></h1>
         
@@ -620,7 +633,7 @@
             <li data-pos="15.">Valentín Roldán – 1 edición – 1 punto</li>
             <li data-pos="16.">Julián Benegas – 1 edición – 1 punto</li>
             <li data-pos="17.">Mariano Miranda – 1 edición – 1 punto</li>
-            <li data-pos="18.">Tobías Márquez – 1 edición – 1 punto</li>
+            <li data-pos="18.">Tobías Márquez – 1 punto</li>
         </ul>
     </main>
 
