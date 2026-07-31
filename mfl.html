@@ -138,6 +138,25 @@
         .btn-edicion:hover { color: var(--color-texto); }
         .btn-edicion.activo { background-color: var(--color-texto); border-color: var(--color-texto); color: var(--bg-base); }
         .tabla-edicion.entrar { animation: appleFadeIn var(--dur-base) var(--curva-apple) both; }
+        /* Salida en cascada de las filas (inversa a la entrada: se retira primero
+           la última fila, contando con nth-last-child en vez de nth-child) */
+        /* Salida en cascada de las filas (inversa a la entrada: se retira primero
+           la última fila, contando con nth-last-child en vez de nth-child).
+           Selectores con el mismo prefijo que la entrada para tener más
+           especificidad y ganarle el empate sin depender del orden en el archivo. */
+        .desplegable-contenido .lista-mfl li.saliendo-cascada, .panel-flotante .lista-mfl li.saliendo-cascada { animation: itemFadeOut var(--dur-base) var(--curva-apple) both; }
+        .desplegable-contenido .lista-mfl li.saliendo-cascada:nth-last-child(1), .panel-flotante .lista-mfl li.saliendo-cascada:nth-last-child(1) { animation-delay: .04s; }
+        .desplegable-contenido .lista-mfl li.saliendo-cascada:nth-last-child(2), .panel-flotante .lista-mfl li.saliendo-cascada:nth-last-child(2) { animation-delay: .07s; }
+        .desplegable-contenido .lista-mfl li.saliendo-cascada:nth-last-child(3), .panel-flotante .lista-mfl li.saliendo-cascada:nth-last-child(3) { animation-delay: .1s; }
+        .desplegable-contenido .lista-mfl li.saliendo-cascada:nth-last-child(4), .panel-flotante .lista-mfl li.saliendo-cascada:nth-last-child(4) { animation-delay: .13s; }
+        .desplegable-contenido .lista-mfl li.saliendo-cascada:nth-last-child(5), .panel-flotante .lista-mfl li.saliendo-cascada:nth-last-child(5) { animation-delay: .16s; }
+        .desplegable-contenido .lista-mfl li.saliendo-cascada:nth-last-child(6), .panel-flotante .lista-mfl li.saliendo-cascada:nth-last-child(6) { animation-delay: .19s; }
+        .desplegable-contenido .lista-mfl li.saliendo-cascada:nth-last-child(7), .panel-flotante .lista-mfl li.saliendo-cascada:nth-last-child(7) { animation-delay: .22s; }
+        .desplegable-contenido .lista-mfl li.saliendo-cascada:nth-last-child(8), .panel-flotante .lista-mfl li.saliendo-cascada:nth-last-child(8) { animation-delay: .25s; }
+        .desplegable-contenido .lista-mfl li.saliendo-cascada:nth-last-child(9), .panel-flotante .lista-mfl li.saliendo-cascada:nth-last-child(9) { animation-delay: .28s; }
+        .desplegable-contenido .lista-mfl li.saliendo-cascada:nth-last-child(10), .panel-flotante .lista-mfl li.saliendo-cascada:nth-last-child(10) { animation-delay: .31s; }
+        .desplegable-contenido .lista-mfl li.saliendo-cascada:nth-last-child(n+11), .panel-flotante .lista-mfl li.saliendo-cascada:nth-last-child(n+11) { animation-delay: .34s; }
+        @keyframes itemFadeOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(-6px); } }
 
         /* CAMPEONES */
         .lista-campeones { display: flex; flex-direction: column; gap: 36px; }
@@ -149,7 +168,7 @@
             transition: color var(--dur-hover) var(--curva-apple);
         }
         .fila-campeon summary::after { content: none; }
-        .fila-campeon summary:hover, .fila-campeon summary:focus-visible, .fila-campeon[open] summary { color: var(--color-texto); }
+        .fila-campeon summary:hover, .fila-campeon summary:focus-visible, .fila-campeon[open] summary { color: var(--color-texto); transform: none; }
         .campeon-titulo { display: flex; align-items: baseline; }
         .campeon-pos { color: var(--color-texto); font-weight: 400; min-width: 2.5ch; margin-right: 12px; text-align: right; flex-shrink: 0; }
         .campeon-estrellas {
@@ -257,6 +276,14 @@
         summary:hover::after { opacity: 1; }
         details[open] summary::after { transform: rotate(90deg); }
         .desplegable-contenido { padding-top: 10px; animation: desplegarFade var(--dur-base) var(--curva-apple) forwards; }
+
+        /* Etiqueta estática de grupo (Ediciones / Rankings en Temporadas): misma
+           tipografía que summary, pero sin flecha ni comportamiento clicable. */
+        .grupo-temporada + .grupo-temporada { margin-top: 20px; }
+        .etiqueta-grupo {
+            font-size: var(--fuente-cuerpo); font-weight: 600; color: var(--color-secundario);
+            text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 10px 0;
+        }
         @keyframes desplegarFade { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
 
         /* LISTAS MFL ALINEADAS POR CUADRÍCULA ELÁSTICA SIMÉTRICA */
@@ -554,25 +581,47 @@
             const ediciones = DATOS[anio];
             const codigos = Object.keys(ediciones);
             const botones = codigos.map((codigo, i) =>
-                `<button class="btn-edicion${i === 0 ? ' activo' : ''}" data-codigo="${codigo}" onclick="mostrarEdicion(this)">${String(i + 1).padStart(2, '0')}</button>`
+                `<button class="btn-edicion" data-codigo="${codigo}" onclick="mostrarEdicion(this)">${String(i + 1).padStart(2, '0')}</button>`
             ).join('');
-            const primeraOrdenada = [...ediciones[codigos[0]].resultados].sort((a, b) => b[1] - a[1]);
-            const tablaInicial = `<ul class="lista-mfl">${primeraOrdenada.map(liPuntaje).join('')}</ul>`;
-            return `<div class="selector-ediciones">${botones}</div><div class="tabla-edicion entrar">${tablaInicial}</div>`;
+            return `<div class="selector-ediciones">${botones}</div><div class="tabla-edicion"></div>`;
+        }
+
+        function plegarTabla(tabla) {
+            const filas = tabla.querySelectorAll('.lista-mfl li');
+            if (filas.length === 0) {
+                tabla.innerHTML = '';
+                return;
+            }
+            let restantes = filas.length;
+            filas.forEach(li => {
+                li.classList.add('saliendo-cascada');
+                li.addEventListener('animationend', () => {
+                    restantes--;
+                    if (restantes <= 0) tabla.innerHTML = '';
+                }, { once: true });
+            });
         }
 
         function mostrarEdicion(boton) {
-            const codigo = boton.dataset.codigo;
             const contenedorBotones = boton.parentElement;
-            contenedorBotones.querySelectorAll('.btn-edicion').forEach(b => b.classList.toggle('activo', b === boton));
+            const tabla = contenedorBotones.nextElementSibling;
+            const yaActivo = boton.classList.contains('activo');
 
+            contenedorBotones.querySelectorAll('.btn-edicion').forEach(b => b.classList.remove('activo'));
+
+            if (yaActivo) {
+                plegarTabla(tabla);
+                return;
+            }
+            boton.classList.add('activo');
+
+            const codigo = boton.dataset.codigo;
             let edicion = null;
             for (const anio in DATOS) {
                 if (DATOS[anio][codigo]) { edicion = DATOS[anio][codigo]; break; }
             }
             const ordenado = [...edicion.resultados].sort((a, b) => b[1] - a[1]);
 
-            const tabla = contenedorBotones.nextElementSibling;
             tabla.classList.remove('entrar');
             tabla.innerHTML = `<ul class="lista-mfl">${ordenado.map(liPuntaje).join('')}</ul>`;
             void tabla.offsetWidth;
@@ -580,20 +629,27 @@
         }
 
         function renderRankingsHTML(ediciones) {
-            const { totales, ediciones_jugadas } = calcularTotales(ediciones);
-            const tablaInicial = `<ul class="lista-mfl">${ordenarPorPuntaje(ediciones, totales, ediciones_jugadas).map(liPuntaje).join('')}</ul>`;
             return `<div class="selector-ediciones">
-                        <button class="btn-edicion activo" data-tipo="puntaje" onclick="mostrarRankingTemporada(this)">PTS</button>
+                        <button class="btn-edicion" data-tipo="puntaje" onclick="mostrarRankingTemporada(this)">PTS</button>
                         <button class="btn-edicion" data-tipo="mfl" onclick="mostrarRankingTemporada(this)">MFL</button>
                     </div>
-                    <div class="tabla-edicion entrar">${tablaInicial}</div>`;
+                    <div class="tabla-edicion"></div>`;
         }
 
         function mostrarRankingTemporada(boton) {
-            const tipo = boton.dataset.tipo;
             const contenedorBotones = boton.parentElement;
-            contenedorBotones.querySelectorAll('.btn-edicion').forEach(b => b.classList.toggle('activo', b === boton));
+            const tabla = contenedorBotones.nextElementSibling;
+            const yaActivo = boton.classList.contains('activo');
 
+            contenedorBotones.querySelectorAll('.btn-edicion').forEach(b => b.classList.remove('activo'));
+
+            if (yaActivo) {
+                plegarTabla(tabla);
+                return;
+            }
+            boton.classList.add('activo');
+
+            const tipo = boton.dataset.tipo;
             const anioActivo = document.querySelector('#selectorAnios .btn-slider.activo').dataset.valor;
             const ediciones = DATOS[anioActivo];
             const { totales, ediciones_jugadas } = calcularTotales(ediciones);
@@ -601,7 +657,6 @@
                 ? `<ul class="lista-mfl">${ordenarPorCoeficienteMFL(ediciones, totales, ediciones_jugadas).map(liPromedio).join('')}</ul>`
                 : `<ul class="lista-mfl">${ordenarPorPuntaje(ediciones, totales, ediciones_jugadas).map(liPuntaje).join('')}</ul>`;
 
-            const tabla = contenedorBotones.nextElementSibling;
             tabla.classList.remove('entrar');
             tabla.innerHTML = html;
             void tabla.offsetWidth;
@@ -610,14 +665,14 @@
 
         function renderTemporadaHTML(anio) {
             return `
-                <details>
-                    <summary>Ediciones</summary>
+                <div class="grupo-temporada">
+                    <p class="etiqueta-grupo">Ediciones</p>
                     <div class="desplegable-contenido">${renderEdicionesHTML(anio)}</div>
-                </details>
-                <details>
-                    <summary>Rankings</summary>
+                </div>
+                <div class="grupo-temporada">
+                    <p class="etiqueta-grupo">Rankings</p>
                     <div class="desplegable-contenido">${renderRankingsHTML(DATOS[anio])}</div>
-                </details>`;
+                </div>`;
         }
 
         function calcularTotalesHistoricos() {
