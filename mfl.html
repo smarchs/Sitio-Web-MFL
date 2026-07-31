@@ -23,6 +23,7 @@
             --fuente: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
             --ancho-bloque: 90%;
             --curva-apple: cubic-bezier(0.25, 1, 0.5, 1);
+            --color-oro: #d4af37;
 
             /* DURACIONES UNIFICADAS: 3 escalones para todo el sitio, misma curva siempre */
             --dur-hover: 0.25s;   /* micro-interacciones: color, opacity, nudge chico */
@@ -138,6 +139,41 @@
         .btn-edicion.activo { background-color: var(--color-texto); border-color: var(--color-texto); color: var(--bg-base); }
         .tabla-edicion.entrar { animation: appleFadeIn var(--dur-base) var(--curva-apple) both; }
 
+        /* CAMPEONES */
+        .lista-campeones { display: flex; flex-direction: column; gap: 36px; }
+        .fila-campeon { margin: 0; }
+        .fila-campeon summary {
+            text-transform: none; letter-spacing: -0.01em; font-size: var(--fuente-cuerpo);
+            font-weight: 600; color: var(--color-secundario); justify-content: space-between;
+            align-items: center; flex-wrap: wrap; row-gap: 8px; padding: 0;
+            transition: color var(--dur-hover) var(--curva-apple);
+        }
+        .fila-campeon summary::after { content: none; }
+        .fila-campeon summary:hover, .fila-campeon summary:focus-visible, .fila-campeon[open] summary { color: var(--color-texto); }
+        .campeon-titulo { display: flex; align-items: baseline; }
+        .campeon-pos { color: var(--color-texto); font-weight: 400; min-width: 2.5ch; margin-right: 12px; text-align: right; flex-shrink: 0; }
+        .campeon-estrellas {
+            color: var(--color-oro); letter-spacing: 0.08em; font-size: clamp(28px, 6vw, 52px); line-height: 1;
+        }
+        .campeon-estrellas .estrella {
+            display: inline-block; text-shadow: none;
+        }
+        .campeon-estrellas.rebote .estrella { animation: estrellaRebote 0.5s var(--curva-apple); }
+        /* Este desfasaje (0s, .5s, 1s...) tiene que coincidir con ESPACIADO_REBOTE_MS del JS */
+        .campeon-estrellas .estrella:nth-child(1) { animation-delay: 0s; }
+        .campeon-estrellas .estrella:nth-child(2) { animation-delay: .5s; }
+        .campeon-estrellas .estrella:nth-child(3) { animation-delay: 1s; }
+        .campeon-estrellas .estrella:nth-child(4) { animation-delay: 1.5s; }
+        .campeon-estrellas .estrella:nth-child(5) { animation-delay: 2s; }
+        .campeon-estrellas .estrella:nth-child(n+6) { animation-delay: 2.5s; }
+        @keyframes estrellaRebote {
+            0% { transform: scale(1); text-shadow: none; }
+            35% { transform: scale(1.3); text-shadow: 0 0 16px rgba(212, 175, 55, 0.5); }
+            60% { transform: scale(0.92); text-shadow: 0 0 10px rgba(212, 175, 55, 0.35); }
+            100% { transform: scale(1); text-shadow: none; }
+        }
+        .fila-campeon .desplegable-contenido .lista-mfl { margin-bottom: 0; margin-left: calc(2.5ch + 12px); }
+
         /* SISTEMA DE SECCIONES (TABS) */
         .seccion { display: none; width: var(--ancho-bloque); margin: 0 auto; padding-top: 18vh; flex-grow: 1; }
         .seccion.active { display: flex; flex-direction: column; justify-content: flex-start; }
@@ -157,18 +193,18 @@
         @keyframes appleFadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Revelación escalonada de las filas dentro de un desplegable, al abrirlo */
-        .desplegable-contenido .lista-mfl li, .panel-flotante .lista-mfl li { animation: itemFadeIn var(--dur-base) var(--curva-apple) both; }
-        .desplegable-contenido .lista-mfl li:nth-child(1), .panel-flotante .lista-mfl li:nth-child(1) { animation-delay: .04s; }
-        .desplegable-contenido .lista-mfl li:nth-child(2), .panel-flotante .lista-mfl li:nth-child(2) { animation-delay: .07s; }
-        .desplegable-contenido .lista-mfl li:nth-child(3), .panel-flotante .lista-mfl li:nth-child(3) { animation-delay: .1s; }
-        .desplegable-contenido .lista-mfl li:nth-child(4), .panel-flotante .lista-mfl li:nth-child(4) { animation-delay: .13s; }
-        .desplegable-contenido .lista-mfl li:nth-child(5), .panel-flotante .lista-mfl li:nth-child(5) { animation-delay: .16s; }
-        .desplegable-contenido .lista-mfl li:nth-child(6), .panel-flotante .lista-mfl li:nth-child(6) { animation-delay: .19s; }
-        .desplegable-contenido .lista-mfl li:nth-child(7), .panel-flotante .lista-mfl li:nth-child(7) { animation-delay: .22s; }
-        .desplegable-contenido .lista-mfl li:nth-child(8), .panel-flotante .lista-mfl li:nth-child(8) { animation-delay: .25s; }
-        .desplegable-contenido .lista-mfl li:nth-child(9), .panel-flotante .lista-mfl li:nth-child(9) { animation-delay: .28s; }
-        .desplegable-contenido .lista-mfl li:nth-child(10), .panel-flotante .lista-mfl li:nth-child(10) { animation-delay: .31s; }
-        .desplegable-contenido .lista-mfl li:nth-child(n+11), .panel-flotante .lista-mfl li:nth-child(n+11) { animation-delay: .34s; }
+        .desplegable-contenido .lista-mfl li, .panel-flotante .lista-mfl li, .lista-campeones .fila-campeon { animation: itemFadeIn var(--dur-base) var(--curva-apple) both; }
+        .desplegable-contenido .lista-mfl li:nth-child(1), .panel-flotante .lista-mfl li:nth-child(1), .lista-campeones .fila-campeon:nth-child(1) { animation-delay: .04s; }
+        .desplegable-contenido .lista-mfl li:nth-child(2), .panel-flotante .lista-mfl li:nth-child(2), .lista-campeones .fila-campeon:nth-child(2) { animation-delay: .07s; }
+        .desplegable-contenido .lista-mfl li:nth-child(3), .panel-flotante .lista-mfl li:nth-child(3), .lista-campeones .fila-campeon:nth-child(3) { animation-delay: .1s; }
+        .desplegable-contenido .lista-mfl li:nth-child(4), .panel-flotante .lista-mfl li:nth-child(4), .lista-campeones .fila-campeon:nth-child(4) { animation-delay: .13s; }
+        .desplegable-contenido .lista-mfl li:nth-child(5), .panel-flotante .lista-mfl li:nth-child(5), .lista-campeones .fila-campeon:nth-child(5) { animation-delay: .16s; }
+        .desplegable-contenido .lista-mfl li:nth-child(6), .panel-flotante .lista-mfl li:nth-child(6), .lista-campeones .fila-campeon:nth-child(6) { animation-delay: .19s; }
+        .desplegable-contenido .lista-mfl li:nth-child(7), .panel-flotante .lista-mfl li:nth-child(7), .lista-campeones .fila-campeon:nth-child(7) { animation-delay: .22s; }
+        .desplegable-contenido .lista-mfl li:nth-child(8), .panel-flotante .lista-mfl li:nth-child(8), .lista-campeones .fila-campeon:nth-child(8) { animation-delay: .25s; }
+        .desplegable-contenido .lista-mfl li:nth-child(9), .panel-flotante .lista-mfl li:nth-child(9), .lista-campeones .fila-campeon:nth-child(9) { animation-delay: .28s; }
+        .desplegable-contenido .lista-mfl li:nth-child(10), .panel-flotante .lista-mfl li:nth-child(10), .lista-campeones .fila-campeon:nth-child(10) { animation-delay: .31s; }
+        .desplegable-contenido .lista-mfl li:nth-child(n+11), .panel-flotante .lista-mfl li:nth-child(n+11), .lista-campeones .fila-campeon:nth-child(n+11) { animation-delay: .34s; }
         @keyframes itemFadeIn { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: translateX(0); } }
 
         /* JERARQUÍA TIPOGRÁFICA */
@@ -297,7 +333,8 @@
                 <li style="--i:3"><a href="#eventos" data-seccion="eventos" onclick="navegar('eventos'); return false;">Eventos</a></li>
                 <li style="--i:4"><a href="#premios" data-seccion="premios" onclick="navegar('premios'); return false;">Premios</a></li>
                 <li style="--i:5"><a href="#temporadas" data-seccion="temporadas" onclick="navegar('temporadas'); return false;">Temporadas</a></li>
-                <li style="--i:6"><a href="#historico" data-seccion="historico" onclick="navegar('historico'); return false;">Histórico</a></li>
+                <li style="--i:6"><a href="#campeones" data-seccion="campeones" onclick="navegar('campeones'); return false;">Campeones</a></li>
+                <li style="--i:7"><a href="#historico" data-seccion="historico" onclick="navegar('historico'); return false;">Histórico</a></li>
             </ul>
         </nav>
     </div>
@@ -343,6 +380,12 @@
     <main id="eventos" class="seccion">
         <h1>Eventos MFL<span>™</span></h1>
         <p class="manifiesto-portada">Próximamente.</p>
+    </main>
+
+    <!-- SECCIÓN: CAMPEONES -->
+    <main id="campeones" class="seccion">
+        <h1>Campeones MFL<span>™</span></h1>
+        <div class="lista-campeones" id="listaCampeones"></div>
     </main>
 
     <!-- SECCIÓN: HISTÓRICO CONSOLIDADO -->
@@ -605,6 +648,108 @@
         }
 
         /* ============================================================
+           CAMPEONES — el ganador de cada edición ya es el primer puesto
+           de esa tabla; no hace falta cargar ningún dato nuevo.
+           ============================================================ */
+        function calcularCampeones() {
+            const campeones = {};
+            Object.keys(DATOS).forEach(anio => {
+                Object.entries(DATOS[anio]).forEach(([codigo, ed]) => {
+                    const ganador = [...ed.resultados].sort((a, b) => b[1] - a[1])[0][0];
+                    if (!campeones[ganador]) campeones[ganador] = [];
+                    campeones[ganador].push(codigo);
+                });
+            });
+            return campeones;
+        }
+
+        function ordenarCampeones(campeones) {
+            const ordenGlobal = Object.keys(todasLasEdicionesCombinadas());
+            return Object.entries(campeones).sort((a, b) => {
+                if (b[1].length !== a[1].length) return b[1].length - a[1].length;
+                const ultA = Math.max(...a[1].map(c => ordenGlobal.indexOf(c)));
+                const ultB = Math.max(...b[1].map(c => ordenGlobal.indexOf(c)));
+                if (ultB !== ultA) return ultB - ultA;
+                return a[0].localeCompare(b[0], 'es');
+            });
+        }
+
+        /* Sonido de "brillo": una nota por cada estrella, sonando justo cuando
+           esa estrella rebota. ESPACIADO_REBOTE_MS debe coincidir con los 0.5s
+           de animation-delay entre estrellas en el CSS (.campeon-estrellas
+           .estrella:nth-child), así el sonido queda sincronizado con el
+           movimiento. Escala mayor ascendente (Do·Re·Mi·Fa·Sol...), sintetizada
+           con Web Audio sin archivos externos. Cada nota se crea y arranca en
+           su propio momento real (setTimeout) en vez de agendarse toda de una
+           contra el reloj interno de audio, para evitar que algunos
+           navegadores (sobre todo en celular) solo dejen sonar la primera. */
+        let audioCtxCampeones = null;
+        const SEMITONOS_ESCALA_MAYOR = [0, 2, 4, 5, 7, 9, 11]; // Do Re Mi Fa Sol La Ti
+        const FRECUENCIA_DO_BASE = 2093.00; // C7
+        const ESPACIADO_REBOTE_MS = 500;
+
+        function tocarNota(indice) {
+            try {
+                const ctx = audioCtxCampeones;
+                const semitonos = SEMITONOS_ESCALA_MAYOR[indice % 7] + 12 * Math.floor(indice / 7);
+                const freq = FRECUENCIA_DO_BASE * Math.pow(2, semitonos / 12);
+                const ahora = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0, ahora);
+                gain.gain.linearRampToValueAtTime(0.1, ahora + 0.015);
+                gain.gain.exponentialRampToValueAtTime(0.0001, ahora + 0.4);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(ahora);
+                osc.stop(ahora + 0.45);
+            } catch (e) {
+                // Web Audio no disponible en este navegador: se ignora en silencio.
+            }
+        }
+
+        function reproducirBrillo(cantidadEstrellas) {
+            try {
+                audioCtxCampeones = audioCtxCampeones || new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtxCampeones.state === 'suspended') audioCtxCampeones.resume();
+                for (let i = 0; i < cantidadEstrellas; i++) {
+                    setTimeout(() => tocarNota(i), i * ESPACIADO_REBOTE_MS);
+                }
+            } catch (e) {
+                // Web Audio no disponible en este navegador: se ignora en silencio.
+            }
+        }
+
+        function renderCampeones() {
+            const campeones = ordenarCampeones(calcularCampeones());
+            const html = campeones.map(([nombre, codigos], i) => {
+                const estrellas = codigos.map(() => `<span class="estrella">★</span>`).join('');
+                const filas = codigos.map(c => `<li data-pos="•">${c}</li>`).join('');
+                return `<details class="fila-campeon">
+                    <summary>
+                        <span class="campeon-titulo"><span class="campeon-pos">${i + 1}.</span><span class="campeon-nombre">${nombre}</span></span>
+                        <span class="campeon-estrellas">${estrellas}</span>
+                    </summary>
+                    <div class="desplegable-contenido"><ul class="lista-mfl">${filas}</ul></div>
+                </details>`;
+            }).join('');
+            document.getElementById('listaCampeones').innerHTML = html;
+
+            document.querySelectorAll('#listaCampeones .fila-campeon').forEach(fila => {
+                fila.addEventListener('toggle', () => {
+                    if (!fila.open) return;
+                    const estrellas = fila.querySelector('.campeon-estrellas');
+                    estrellas.classList.remove('rebote');
+                    void estrellas.offsetWidth;
+                    estrellas.classList.add('rebote');
+                    reproducirBrillo(fila.querySelectorAll('.estrella').length);
+                });
+            });
+        }
+
+        /* ============================================================
            REGLAMENTO — datos + render
            ============================================================ */
         const REGLAS = [
@@ -772,7 +917,7 @@
         /* ============================================================
            NAVEGACIÓN (tabs + routing por URL)
            ============================================================ */
-        const SECCIONES = ['inicio', 'reglamento', 'eventos', 'premios', 'temporadas', 'historico'];
+        const SECCIONES = ['inicio', 'reglamento', 'eventos', 'premios', 'temporadas', 'campeones', 'historico'];
         const menuBtn = document.getElementById('menuBtn');
         const menuNav = document.getElementById('menuNav');
 
@@ -826,6 +971,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             inicializarSliders();
+            renderCampeones();
             navegar(location.hash.slice(1) || 'inicio', false);
         });
     </script>
