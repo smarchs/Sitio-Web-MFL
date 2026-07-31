@@ -586,19 +586,62 @@
             return `<div class="selector-ediciones">${botones}</div><div class="tabla-edicion"></div>`;
         }
 
+        /* Retrasos de la cascada de filas (deben coincidir con las reglas
+           .saliendo-cascada:nth-last-child en el CSS) para poder calcular cuánto
+           dura la cascada completa según la cantidad de filas. */
+        const PASOS_CASCADA = [.04, .07, .1, .13, .16, .19, .22, .25, .28, .31];
+
+        function duracionCascada(cantidadFilas) {
+            const delayMax = cantidadFilas <= PASOS_CASCADA.length ? PASOS_CASCADA[cantidadFilas - 1] : .34;
+            return delayMax + .4; // + duración de --dur-base de cada fila individual
+        }
+
         function plegarTabla(tabla) {
             const filas = tabla.querySelectorAll('.lista-mfl li');
             if (filas.length === 0) {
                 tabla.innerHTML = '';
                 return;
             }
-            let restantes = filas.length;
-            filas.forEach(li => {
-                li.classList.add('saliendo-cascada');
-                li.addEventListener('animationend', () => {
-                    restantes--;
-                    if (restantes <= 0) tabla.innerHTML = '';
-                }, { once: true });
+            filas.forEach(li => li.classList.add('saliendo-cascada'));
+
+            // Alto real actual, para achicarlo hasta 0 en simultáneo con la cascada de filas
+            const alturaActual = tabla.scrollHeight;
+            tabla.style.height = alturaActual + 'px';
+            tabla.style.overflow = 'hidden';
+            void tabla.offsetHeight;
+            const duracion = duracionCascada(filas.length) * 0.6;
+            tabla.style.transition = `height ${duracion}s linear`;
+            tabla.style.height = '0px';
+
+            tabla.addEventListener('transitionend', function limpiar(e) {
+                if (e.propertyName !== 'height') return;
+                tabla.removeEventListener('transitionend', limpiar);
+                tabla.innerHTML = '';
+                tabla.style.height = '';
+                tabla.style.overflow = '';
+                tabla.style.transition = '';
+            });
+        }
+
+        function desplegarTabla(tabla, html) {
+            tabla.style.transition = '';
+            tabla.style.overflow = 'hidden';
+            tabla.style.height = '0px';
+            tabla.innerHTML = html;
+            void tabla.offsetHeight;
+
+            const filas = tabla.querySelectorAll('.lista-mfl li');
+            const alturaFinal = tabla.scrollHeight;
+            const duracion = duracionCascada(filas.length) * 0.6;
+            tabla.style.transition = `height ${duracion}s linear`;
+            tabla.style.height = alturaFinal + 'px';
+
+            tabla.addEventListener('transitionend', function limpiar(e) {
+                if (e.propertyName !== 'height') return;
+                tabla.removeEventListener('transitionend', limpiar);
+                tabla.style.height = '';
+                tabla.style.overflow = '';
+                tabla.style.transition = '';
             });
         }
 
@@ -622,10 +665,7 @@
             }
             const ordenado = [...edicion.resultados].sort((a, b) => b[1] - a[1]);
 
-            tabla.classList.remove('entrar');
-            tabla.innerHTML = `<ul class="lista-mfl">${ordenado.map(liPuntaje).join('')}</ul>`;
-            void tabla.offsetWidth;
-            tabla.classList.add('entrar');
+            desplegarTabla(tabla, `<ul class="lista-mfl">${ordenado.map(liPuntaje).join('')}</ul>`);
         }
 
         function renderRankingsHTML(ediciones) {
@@ -657,10 +697,7 @@
                 ? `<ul class="lista-mfl">${ordenarPorCoeficienteMFL(ediciones, totales, ediciones_jugadas).map(liPromedio).join('')}</ul>`
                 : `<ul class="lista-mfl">${ordenarPorPuntaje(ediciones, totales, ediciones_jugadas).map(liPuntaje).join('')}</ul>`;
 
-            tabla.classList.remove('entrar');
-            tabla.innerHTML = html;
-            void tabla.offsetWidth;
-            tabla.classList.add('entrar');
+            desplegarTabla(tabla, html);
         }
 
         function renderTemporadaHTML(anio) {
@@ -1007,6 +1044,7 @@
             if (destino) {
                 destino.classList.add('active');
                 resincronizarIndicadores(destino);
+                if (idSeccion === 'campeones') renderCampeones();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
 
@@ -1030,7 +1068,6 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             inicializarSliders();
-            renderCampeones();
             navegar(location.hash.slice(1) || 'inicio', false);
         });
     </script>
