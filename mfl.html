@@ -137,9 +137,6 @@
         }
         .btn-edicion:hover { color: var(--color-texto); }
         .btn-edicion.activo { background-color: var(--color-texto); border-color: var(--color-texto); color: var(--bg-base); }
-        .tabla-edicion.entrar { animation: appleFadeIn var(--dur-base) var(--curva-apple) both; }
-        /* Salida en cascada de las filas (inversa a la entrada: se retira primero
-           la última fila, contando con nth-last-child en vez de nth-child) */
         /* Salida en cascada de las filas (inversa a la entrada: se retira primero
            la última fila, contando con nth-last-child en vez de nth-child).
            Selectores con el mismo prefijo que la entrada para tener más
@@ -261,10 +258,13 @@
 
         /* INTERFAZ DESPLEGABLE NATIVA */
         details { margin: 5px 0; width: 100%; }
-        summary {
+        summary, .etiqueta-grupo {
             font-size: var(--fuente-cuerpo); font-weight: 600; color: var(--color-secundario);
-            text-transform: uppercase; letter-spacing: 0.05em; padding: 12px 0;
-            cursor: pointer; list-style: none; display: flex; align-items: center; outline: none; user-select: none;
+            text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        summary {
+            padding: 12px 0; cursor: pointer; list-style: none; display: flex; align-items: center;
+            outline: none; user-select: none;
             transition: color var(--dur-hover) var(--curva-apple), transform var(--dur-hover) var(--curva-apple);
         }
         summary:hover, summary:focus-visible { color: var(--color-texto); transform: translateX(4px); }
@@ -280,10 +280,7 @@
         /* Etiqueta estática de grupo (Ediciones / Rankings en Temporadas): misma
            tipografía que summary, pero sin flecha ni comportamiento clicable. */
         .grupo-temporada + .grupo-temporada { margin-top: 20px; }
-        .etiqueta-grupo {
-            font-size: var(--fuente-cuerpo); font-weight: 600; color: var(--color-secundario);
-            text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 10px 0;
-        }
+        .etiqueta-grupo { margin: 0 0 10px 0; }
         @keyframes desplegarFade { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
 
         /* LISTAS MFL ALINEADAS POR CUADRÍCULA ELÁSTICA SIMÉTRICA */
@@ -295,8 +292,7 @@
         }
         .lista-mfl li:hover { color: var(--color-texto); transform: translateX(4px); }
         .lista-mfl li:hover::before { color: var(--color-texto); }
-        #panelPremio .lista-mfl li:hover { transform: none; }
-        #panelHistorico .lista-mfl li:hover { transform: none; }
+        #panelPremio .lista-mfl li:hover, #panelHistorico .lista-mfl li:hover { transform: none; }
 
         /* Contenedor elástico normalizado para evitar descalibración */
         .lista-mfl li::before {
@@ -639,13 +635,19 @@
             tabla.addEventListener('transitionend', function limpiar(e) {
                 if (e.propertyName !== 'height') return;
                 tabla.removeEventListener('transitionend', limpiar);
-                tabla.style.height = '';
                 tabla.style.overflow = '';
                 tabla.style.transition = '';
+                // La altura queda fija en el valor exacto que se animó (no se vuelve
+                // a 'auto') para evitar que un redondeo de subpíxel la recalcule
+                // 1px distinto y se sienta como un salto al terminar.
             });
         }
 
-        function mostrarEdicion(boton) {
+        /* Toggle compartido por los circulitos de edición y los de PTS/MFL: si el
+           botón tocado ya estaba activo, pliega; si no, activa ese botón (y
+           desactiva los demás del mismo grupo) y despliega el HTML que arme
+           construirHtml(). */
+        function alternarBotonTabla(boton, construirHtml) {
             const contenedorBotones = boton.parentElement;
             const tabla = contenedorBotones.nextElementSibling;
             const yaActivo = boton.classList.contains('activo');
@@ -657,15 +659,19 @@
                 return;
             }
             boton.classList.add('activo');
+            desplegarTabla(tabla, construirHtml());
+        }
 
-            const codigo = boton.dataset.codigo;
-            let edicion = null;
-            for (const anio in DATOS) {
-                if (DATOS[anio][codigo]) { edicion = DATOS[anio][codigo]; break; }
-            }
-            const ordenado = [...edicion.resultados].sort((a, b) => b[1] - a[1]);
-
-            desplegarTabla(tabla, `<ul class="lista-mfl">${ordenado.map(liPuntaje).join('')}</ul>`);
+        function mostrarEdicion(boton) {
+            alternarBotonTabla(boton, () => {
+                const codigo = boton.dataset.codigo;
+                let edicion = null;
+                for (const anio in DATOS) {
+                    if (DATOS[anio][codigo]) { edicion = DATOS[anio][codigo]; break; }
+                }
+                const ordenado = [...edicion.resultados].sort((a, b) => b[1] - a[1]);
+                return `<ul class="lista-mfl">${ordenado.map(liPuntaje).join('')}</ul>`;
+            });
         }
 
         function renderRankingsHTML(ediciones) {
@@ -677,27 +683,15 @@
         }
 
         function mostrarRankingTemporada(boton) {
-            const contenedorBotones = boton.parentElement;
-            const tabla = contenedorBotones.nextElementSibling;
-            const yaActivo = boton.classList.contains('activo');
-
-            contenedorBotones.querySelectorAll('.btn-edicion').forEach(b => b.classList.remove('activo'));
-
-            if (yaActivo) {
-                plegarTabla(tabla);
-                return;
-            }
-            boton.classList.add('activo');
-
-            const tipo = boton.dataset.tipo;
-            const anioActivo = document.querySelector('#selectorAnios .btn-slider.activo').dataset.valor;
-            const ediciones = DATOS[anioActivo];
-            const { totales, ediciones_jugadas } = calcularTotales(ediciones);
-            const html = tipo === 'mfl'
-                ? `<ul class="lista-mfl">${ordenarPorCoeficienteMFL(ediciones, totales, ediciones_jugadas).map(liPromedio).join('')}</ul>`
-                : `<ul class="lista-mfl">${ordenarPorPuntaje(ediciones, totales, ediciones_jugadas).map(liPuntaje).join('')}</ul>`;
-
-            desplegarTabla(tabla, html);
+            alternarBotonTabla(boton, () => {
+                const tipo = boton.dataset.tipo;
+                const anioActivo = document.querySelector('#selectorAnios .btn-slider.activo').dataset.valor;
+                const ediciones = DATOS[anioActivo];
+                const { totales, ediciones_jugadas } = calcularTotales(ediciones);
+                return tipo === 'mfl'
+                    ? `<ul class="lista-mfl">${ordenarPorCoeficienteMFL(ediciones, totales, ediciones_jugadas).map(liPromedio).join('')}</ul>`
+                    : `<ul class="lista-mfl">${ordenarPorPuntaje(ediciones, totales, ediciones_jugadas).map(liPuntaje).join('')}</ul>`;
+            });
         }
 
         function renderTemporadaHTML(anio) {
