@@ -4,17 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>M.A.F.I.A. League ™</title>
+    <meta name="description" content="Plataforma oficial de la MFL™: resultados, rankings, premios y reglamento del torneo de fútbol virtual entre amigos.">
+    <meta property="og:title" content="M.A.F.I.A. League™">
+    <meta property="og:description" content="Resultados, rankings, premios y reglamento del torneo de fútbol virtual entre amigos.">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="M.A.F.I.A. League™">
+    <meta name="twitter:description" content="Resultados, rankings, premios y reglamento del torneo de fútbol virtual entre amigos.">
     <style>
         :root {
+            color-scheme: light dark;
             --bg-base: #ffffff;
             --bg-gradiente: radial-gradient(circle at 50% -20%, #ffffff 0%, #f5f5f7 65%, #e8e8ed 100%);
             --bg-header: rgba(255, 255, 255, 0.8);
             --borde: rgba(0, 0, 0, 0.08);
             --color-texto: #1d1d1f;
-            --color-secundario: #86868b;
+            --color-secundario: #6e6e73;
             --fuente: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
             --ancho-bloque: 90%;
             --curva-apple: cubic-bezier(0.25, 1, 0.5, 1);
+
+            /* DURACIONES UNIFICADAS: 3 escalones para todo el sitio, misma curva siempre */
+            --dur-hover: 0.25s;   /* micro-interacciones: color, opacity, nudge chico */
+            --dur-base: 0.4s;     /* transición de un componente: indicador, panel, detalle */
+            --dur-entrada: 0.6s;  /* revelaciones grandes: sección activa, menú fullscreen */
+
+            /* SOMBRAS (se ajustan en modo oscuro más abajo) */
+            --sombra-panel: 0 20px 60px rgba(0, 0, 0, 0.05);
+            --sombra-media: 0 4px 30px rgba(0, 0, 0, 0.03);
+            --sombra-media-hover: 0 14px 45px rgba(0, 0, 0, 0.08);
             
             /* ESCALA TIPOGRÁFICA UNIFICADA */
             --fuente-cuerpo: clamp(18px, 2.5vw, 24px);
@@ -30,6 +48,10 @@
                 --bg-header: rgba(0, 0, 0, 0.8);
                 --borde: rgba(255, 255, 255, 0.08);
                 --color-texto: #f5f5f7;
+                --color-secundario: #98989d;
+                --sombra-panel: 0 20px 60px rgba(0, 0, 0, 0.4);
+                --sombra-media: 0 4px 30px rgba(0, 0, 0, 0.3);
+                --sombra-media-hover: 0 14px 50px rgba(0, 0, 0, 0.55);
             }
         }
 
@@ -50,8 +72,14 @@
             border-bottom: 1px solid var(--borde);
         }
 
-        .logo { font-size: 15px; font-weight: 600; text-decoration: none; color: var(--color-texto); }
-        .menu-toggle { background: none; border: none; color: var(--color-texto); font-size: 14px; cursor: pointer; opacity: 0.8; transition: opacity 0.3s var(--curva-apple); }
+        .logo { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; text-decoration: none; color: var(--color-texto); transition: opacity var(--dur-hover) var(--curva-apple); }
+        .logo:hover, .logo:focus-visible { opacity: 0.6; }
+        .menu-toggle { background: none; border: none; color: var(--color-texto); font-family: var(--fuente); font-size: 15px; font-weight: 600; letter-spacing: -0.01em; cursor: pointer; opacity: 1; transition: opacity var(--dur-hover) var(--curva-apple); }
+        .menu-toggle:hover, .menu-toggle:focus-visible { opacity: 0.6; }
+
+        a:focus-visible, button:focus-visible, summary:focus-visible {
+            outline: 2px solid var(--color-secundario); outline-offset: 5px; border-radius: 3px;
+        }
 
         /* MENÚ DESPLEGABLE */
         .menu-desplegable {
@@ -59,36 +87,101 @@
             background: inherit; z-index: 4000; display: flex; align-items: center;
             padding: 0 calc((100% - var(--ancho-bloque)) / 2);
             opacity: 0; pointer-events: none; transform: scale(1.02) translateY(-10px);
-            transition: opacity 0.5s var(--curva-apple), transform 0.5s var(--curva-apple);
+            transition: opacity var(--dur-entrada) var(--curva-apple), transform var(--dur-entrada) var(--curva-apple);
         }
         .menu-desplegable.active { opacity: 1; pointer-events: auto; transform: scale(1) translateY(0); }
         .menu-desplegable ul { list-style: none; width: 100%; }
-        .menu-desplegable ul li { margin-bottom: 3.5vh; opacity: 0; transform: translateY(15px); transition: 0.5s var(--curva-apple); }
+        .menu-desplegable ul li { margin-bottom: 3.5vh; opacity: 0; transform: translateY(16px); transition: var(--dur-entrada) var(--curva-apple); }
         .menu-desplegable.active ul li { opacity: 1; transform: translateY(0); }
-        .menu-desplegable ul li a { font-size: clamp(32px, 6.5vw, 60px); font-weight: 700; color: var(--color-texto); text-decoration: none; opacity: 0.35; transition: opacity 0.3s var(--curva-apple); }
-        .menu-desplegable ul li a:hover { opacity: 1; transform: translateX(4px); }
+        .menu-desplegable ul li a { font-size: clamp(32px, 6.5vw, 60px); font-weight: 700; color: var(--color-texto); text-decoration: none; opacity: 0.35; display: inline-flex; align-items: center; transition: opacity var(--dur-hover) var(--curva-apple), transform var(--dur-hover) var(--curva-apple); }
+        .menu-desplegable ul li a:hover, .menu-desplegable ul li a:focus-visible { opacity: 1; transform: translateX(4px); }
+        .menu-desplegable ul li a.activo { opacity: 1; }
+        .menu-desplegable ul li a.activo::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--color-texto); margin-left: 16px; transform: translateY(0.08em); }
+
+        /* CONTROL DESLIZANTE REUTILIZABLE (Temporadas, Reglamento, Premios) */
+        .selector-slider {
+            position: relative; display: flex; gap: 4px; margin-bottom: 40px; padding: 4px;
+            border: 1px solid var(--borde); border-radius: 100px; width: fit-content; max-width: 100%;
+            overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--borde) transparent;
+        }
+        .selector-slider::-webkit-scrollbar { height: 3px; }
+        .selector-slider::-webkit-scrollbar-track { background: transparent; }
+        .selector-slider::-webkit-scrollbar-thumb { background: var(--borde); border-radius: 100px; }
+        .indicador-slider { position: absolute; top: 4px; bottom: 4px; left: 0; border-radius: 100px; background: var(--color-texto); transition: transform var(--dur-base) var(--curva-apple), width var(--dur-base) var(--curva-apple); z-index: 0; }
+        .btn-slider {
+            position: relative; z-index: 1; font-family: var(--fuente); font-size: 15px; font-weight: 600; letter-spacing: -0.01em;
+            padding: 9px 20px; border-radius: 100px; border: none; background: transparent;
+            color: var(--color-secundario); cursor: pointer; white-space: nowrap;
+            transition: color var(--dur-base) var(--curva-apple);
+        }
+        .btn-slider:hover { color: var(--color-texto); }
+        .btn-slider.activo { color: var(--bg-base); }
+        .panel-flotante {
+            border: 1px solid var(--borde); border-radius: 16px; padding: 30px clamp(20px, 4vw, 40px);
+            background: var(--bg-header); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            box-shadow: var(--sombra-panel); margin-bottom: 40px;
+        }
+        .panel-flotante.entrar { animation: appleFadeIn var(--dur-base) var(--curva-apple) both; }
+        .panel-flotante > *:first-child { margin-top: 0; }
+        .panel-flotante > *:last-child { margin-bottom: 0; }
+
+        /* CIRCULITOS DE EDICIÓN / TIPO DE TABLA (Temporadas: ediciones y PTS-MFL) */
+        .selector-ediciones { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+        .btn-edicion {
+            min-width: 36px; height: 36px; padding: 0 10px; flex-shrink: 0; border-radius: 100px; border: 1px solid var(--borde);
+            background: transparent; color: var(--color-secundario); font-family: var(--fuente);
+            font-size: 13px; font-weight: 600; letter-spacing: -0.01em; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: color var(--dur-hover) var(--curva-apple), background-color var(--dur-hover) var(--curva-apple), border-color var(--dur-hover) var(--curva-apple);
+        }
+        .btn-edicion:hover { color: var(--color-texto); }
+        .btn-edicion.activo { background-color: var(--color-texto); border-color: var(--color-texto); color: var(--bg-base); }
+        .tabla-edicion.entrar { animation: appleFadeIn var(--dur-base) var(--curva-apple) both; }
 
         /* SISTEMA DE SECCIONES (TABS) */
-        .seccion { display: none; width: var(--ancho-bloque); margin: 0 auto; padding-top: 18vh; flex-grow: 1; opacity: 0; transform: translateY(20px); }
-        .seccion.active { display: flex; flex-direction: column; justify-content: flex-start; animation: appleFadeIn 0.8s var(--curva-apple) forwards; }
-        @keyframes appleFadeIn { to { opacity: 1; transform: translateY(0); } }
+        .seccion { display: none; width: var(--ancho-bloque); margin: 0 auto; padding-top: 18vh; flex-grow: 1; }
+        .seccion.active { display: flex; flex-direction: column; justify-content: flex-start; }
+
+        /* Revelación escalonada: cada hijo directo de la sección activa entra con un leve retraso */
+        .seccion.active > * { animation: appleFadeIn var(--dur-entrada) var(--curva-apple) both; }
+        .seccion.active > *:nth-child(1) { animation-delay: 0s; }
+        .seccion.active > *:nth-child(2) { animation-delay: .05s; }
+        .seccion.active > *:nth-child(3) { animation-delay: .1s; }
+        .seccion.active > *:nth-child(4) { animation-delay: .15s; }
+        .seccion.active > *:nth-child(5) { animation-delay: .2s; }
+        .seccion.active > *:nth-child(6) { animation-delay: .25s; }
+        .seccion.active > *:nth-child(7) { animation-delay: .3s; }
+        .seccion.active > *:nth-child(8) { animation-delay: .35s; }
+        .seccion.active > *:nth-child(9) { animation-delay: .4s; }
+        .seccion.active > *:nth-child(n+10) { animation-delay: .45s; }
+        @keyframes appleFadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Revelación escalonada de las filas dentro de un desplegable, al abrirlo */
+        .desplegable-contenido .lista-mfl li, .panel-flotante .lista-mfl li { animation: itemFadeIn var(--dur-base) var(--curva-apple) both; }
+        .desplegable-contenido .lista-mfl li:nth-child(1), .panel-flotante .lista-mfl li:nth-child(1) { animation-delay: .04s; }
+        .desplegable-contenido .lista-mfl li:nth-child(2), .panel-flotante .lista-mfl li:nth-child(2) { animation-delay: .07s; }
+        .desplegable-contenido .lista-mfl li:nth-child(3), .panel-flotante .lista-mfl li:nth-child(3) { animation-delay: .1s; }
+        .desplegable-contenido .lista-mfl li:nth-child(4), .panel-flotante .lista-mfl li:nth-child(4) { animation-delay: .13s; }
+        .desplegable-contenido .lista-mfl li:nth-child(5), .panel-flotante .lista-mfl li:nth-child(5) { animation-delay: .16s; }
+        .desplegable-contenido .lista-mfl li:nth-child(6), .panel-flotante .lista-mfl li:nth-child(6) { animation-delay: .19s; }
+        .desplegable-contenido .lista-mfl li:nth-child(7), .panel-flotante .lista-mfl li:nth-child(7) { animation-delay: .22s; }
+        .desplegable-contenido .lista-mfl li:nth-child(8), .panel-flotante .lista-mfl li:nth-child(8) { animation-delay: .25s; }
+        .desplegable-contenido .lista-mfl li:nth-child(9), .panel-flotante .lista-mfl li:nth-child(9) { animation-delay: .28s; }
+        .desplegable-contenido .lista-mfl li:nth-child(10), .panel-flotante .lista-mfl li:nth-child(10) { animation-delay: .31s; }
+        .desplegable-contenido .lista-mfl li:nth-child(n+11), .panel-flotante .lista-mfl li:nth-child(n+11) { animation-delay: .34s; }
+        @keyframes itemFadeIn { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: translateX(0); } }
 
         /* JERARQUÍA TIPOGRÁFICA */
-        h1 { font-size: var(--fuente-h1); font-weight: 800; letter-spacing: -0.05em; line-height: 1.05; margin-bottom: 50px; }
+        h1 { font-size: var(--fuente-h1); font-weight: 800; letter-spacing: -0.05em; line-height: 1.05; border-bottom: 1px solid var(--borde); padding-bottom: 40px; margin-bottom: 40px; }
         h1 span { font-size: 0.38em; vertical-align: super; font-weight: 600; }
         
         h2 { font-size: var(--fuente-titulo-seccion); font-weight: 700; color: var(--color-texto); letter-spacing: -0.03em; margin: 35px 0 15px 0; }
         .desplegable-contenido h2 { font-size: var(--fuente-subtitulo); margin: 25px 0 10px 0; }
         
-        #reglamento > p:first-of-type, #premios > h2:first-of-type, #temporadas > h2:first-of-type, #historico > h2:first-of-type, #eventos > h2:first-of-type { border-top: 1px solid var(--borde); padding-top: 45px; margin-top: 0; margin-bottom: 20px; }
-        #premios h2:not(:first-of-type), #historico h2:not(:first-of-type), #eventos h2:not(:first-of-type) { border-top: 1px solid var(--borde); padding-top: 30px; margin-top: 40px; margin-bottom: 20px; }
-        
-        .bloque-temporada-anterior { border-top: 1px solid var(--borde); margin-top: 45px; padding-top: 25px; }
-        .bloque-temporada-actual h2, .bloque-temporada-anterior h2 { margin-top: 10px; }
         .desplegable-contenido > h2:first-of-type { margin-top: 5px; }
         
         .regla-bloque { font-size: var(--fuente-cuerpo); line-height: 1.55; color: var(--color-secundario); font-weight: 500; letter-spacing: -0.02em; margin-bottom: 25px; max-width: 95%; text-align: justify; }
-        .manifiesto-portada { font-size: clamp(24px, 3.8vw, 40px); line-height: 1.38; border-top: 1px solid var(--borde); padding-top: 45px; color: var(--color-secundario); font-weight: 500; letter-spacing: -0.035em; margin-bottom: 40px; }
+        .manifiesto-portada { font-size: clamp(24px, 3.8vw, 40px); line-height: 1.38; color: var(--color-secundario); font-weight: 500; letter-spacing: -0.035em; margin-bottom: 40px; }
 
         /* CONTENEDOR MULTIMEDIA CON ALINEACIÓN IZQUIERDA RÍGIDA */
         .video-contenedor {
@@ -98,10 +191,12 @@
             aspect-ratio: 16 / 9;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+            box-shadow: var(--sombra-media);
             border: 1px solid var(--borde);
             background-color: rgba(0, 0, 0, 0.05);
+            transition: box-shadow var(--dur-base) var(--curva-apple), transform var(--dur-base) var(--curva-apple);
         }
+        .video-contenedor:hover { box-shadow: var(--sombra-media-hover); transform: translateY(-3px); }
         .video-contenedor iframe {
             width: 100%;
             height: 100%;
@@ -115,14 +210,17 @@
             font-size: var(--fuente-cuerpo); font-weight: 600; color: var(--color-secundario);
             text-transform: uppercase; letter-spacing: 0.05em; padding: 12px 0;
             cursor: pointer; list-style: none; display: flex; align-items: center; outline: none; user-select: none;
+            transition: color var(--dur-hover) var(--curva-apple), transform var(--dur-hover) var(--curva-apple);
         }
+        summary:hover, summary:focus-visible { color: var(--color-texto); transform: translateX(4px); }
         summary::-webkit-details-marker { display: none; }
         summary::after {
             content: "→"; font-size: 0.8em; margin-left: 12px; color: var(--color-secundario); opacity: 0.5;
-            transition: transform 0.4s var(--curva-apple);
+            transition: transform var(--dur-base) var(--curva-apple), opacity var(--dur-hover) var(--curva-apple);
         }
+        summary:hover::after { opacity: 1; }
         details[open] summary::after { transform: rotate(90deg); }
-        .desplegable-contenido { padding-top: 10px; animation: desplegarFade 0.5s var(--curva-apple) forwards; }
+        .desplegable-contenido { padding-top: 10px; animation: desplegarFade var(--dur-base) var(--curva-apple) forwards; }
         @keyframes desplegarFade { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
 
         /* LISTAS MFL ALINEADAS POR CUADRÍCULA ELÁSTICA SIMÉTRICA */
@@ -130,7 +228,12 @@
         .lista-mfl li {
             font-size: var(--fuente-cuerpo); line-height: 1.6; color: var(--color-secundario);
             font-weight: 500; margin-bottom: 8px; display: flex; align-items: flex-start;
+            transition: color var(--dur-hover) var(--curva-apple), transform var(--dur-hover) var(--curva-apple);
         }
+        .lista-mfl li:hover { color: var(--color-texto); transform: translateX(4px); }
+        .lista-mfl li:hover::before { color: var(--color-texto); }
+        #panelPremio .lista-mfl li:hover { transform: none; }
+        #panelHistorico .lista-mfl li:hover { transform: none; }
 
         /* Contenedor elástico normalizado para evitar descalibración */
         .lista-mfl li::before {
@@ -155,31 +258,46 @@
             color: var(--color-texto);
         }
 
-        .num-regla { font-size: 3.2em; font-weight: 800; float: left; line-height: 0.85; margin-right: 14px; margin-top: 4px; color: var(--color-texto); letter-spacing: -0.05em; }
-
-        footer { width: var(--ancho-bloque); margin: 0 auto; padding: 40px 0; font-size: 13px; font-weight: 500; color: var(--color-secundario); opacity: 0.6; border-top: 1px solid var(--borde); margin-top: 50px; }
+        footer { width: var(--ancho-bloque); margin: 0 auto; padding: 40px 0; font-size: 13px; font-weight: 500; color: var(--color-secundario); border-top: 1px solid var(--borde); margin-top: 50px; }
 
         @media (max-width: 1024px) { .seccion { padding-top: 15vh; } }
         @media (max-width: 768px) { .regla-bloque, .lista-mfl, h2, .desplegable-contenido h2 { max-width: 100%; } }
-        @media (max-width: 480px) { .seccion { padding-top: 12vh; } h1 { margin-bottom: 35px; } .regla-bloque { margin-bottom: 25px; } }
+        @media (max-width: 480px) { .seccion { padding-top: 12vh; } h1 { padding-bottom: 30px; margin-bottom: 30px; } .regla-bloque { margin-bottom: 25px; } }
+
+        /* En pantallas muy anchas, el 90% del viewport da líneas de texto demasiado
+           largas para leer cómodamente. A partir de 1556px (donde el 90% ya mide
+           1400px) se tope ese mismo ancho como valor fijo. Como header, menú y
+           footer se centran con esta misma variable, quedan alineados igual. */
+        @media (min-width: 1556px) {
+            :root { --ancho-bloque: 1400px; }
+        }
+
+        html { scroll-behavior: smooth; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important; animation-delay: 0s !important;
+                transition-duration: 0.01ms !important; scroll-behavior: auto !important;
+            }
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <a href="#" class="logo" onclick="navegar('inicio')">MFL™</a>
-        <button class="menu-toggle" id="menuBtn" onclick="toggleMenu()">Menú</button>
+        <a href="#inicio" class="logo" onclick="navegar('inicio'); return false;">MFL™</a>
+        <button class="menu-toggle" id="menuBtn" onclick="toggleMenu()" aria-expanded="false" aria-controls="menuNav">Menú</button>
     </header>
 
     <div class="menu-desplegable" id="menuNav">
         <nav style="width: 100%;">
             <ul>
-                <li style="--i:1"><a href="#" onclick="navegar('inicio')">Inicio</a></li>
-                <li style="--i:2"><a href="#" onclick="navegar('reglamento')">Reglamento</a></li>
-                <li style="--i:3"><a href="#" onclick="navegar('eventos')">Eventos</a></li>
-                <li style="--i:4"><a href="#" onclick="navegar('premios')">Premios</a></li>
-                <li style="--i:5"><a href="#" onclick="navegar('temporadas')">Temporadas</a></li>
-                <li style="--i:6"><a href="#" onclick="navegar('historico')">Histórico</a></li>
+                <li style="--i:1"><a href="#inicio" data-seccion="inicio" onclick="navegar('inicio'); return false;">Inicio</a></li>
+                <li style="--i:2"><a href="#reglamento" data-seccion="reglamento" onclick="navegar('reglamento'); return false;">Reglamento</a></li>
+                <li style="--i:3"><a href="#eventos" data-seccion="eventos" onclick="navegar('eventos'); return false;">Eventos</a></li>
+                <li style="--i:4"><a href="#premios" data-seccion="premios" onclick="navegar('premios'); return false;">Premios</a></li>
+                <li style="--i:5"><a href="#temporadas" data-seccion="temporadas" onclick="navegar('temporadas'); return false;">Temporadas</a></li>
+                <li style="--i:6"><a href="#historico" data-seccion="historico" onclick="navegar('historico'); return false;">Histórico</a></li>
             </ul>
         </nav>
     </div>
@@ -193,495 +311,524 @@
         
         <!-- REPRODUCTOR DE VIDEO ALINEADO A LA IZQUIERDA -->
         <div class="video-contenedor">
-            <iframe src="https://www.youtube.com/embed/cEF8H5GfrMw" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
+            <iframe src="https://www.youtube.com/embed/cEF8H5GfrMw" title="Video de presentación de la MFL League" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
         </div>
     </main>
 
     <!-- SECCIÓN: REGLAMENTO -->
     <main id="reglamento" class="seccion">
         <h1>Reglamento MFL<span>™</span></h1>
-        
-        <p class="regla-bloque"><span class="num-regla">01.</span>El torneo se organiza en temporadas divididas en ediciones de temática variable a lo largo del año. Para cada edición se confecciona una tabla de posiciones específica donde el ganador se lleva tantos puntos como participantes jueguen esa fecha; por ejemplo, en una edición de 10 jugadores, el primero suma 10 puntos. El último clasificado siempre obtiene 1 punto y el resto escala de forma proporcional. En paralelo, la Tabla General de la temporada acumula la sumatoria de los puntos obtenidos en cada edición para definir al campeón absoluto.</p>
 
-        <p class="regla-bloque"><span class="num-regla">02.</span>Cada edición requiere un mínimo de 5 participantes para ser contabilizada de manera oficial y tiene un cupo máximo estricto de 10 jugadores. Si asisten 4 o menos no computa para la Tabla General. El sistema de inscripción se rige bajo la premisa de orden de llegada: los primeros 10 miembros del grupo en confirmar su asistencia aseguran su plaza. Todo jugador debe permanecer durante toda la jornada; en caso de retiro anticipado o llegada tardía que impida disputar los cruces, los partidos faltantes se computarán como derrotas automáticas por un resultado de 3-0. Asimismo, el participante que confirme su asistencia y no se presente a la jornada sufrirá una penalización directa de 3 puntos en la Tabla General de la temporada.</p>
-
-        <p class="regla-bloque"><span class="num-regla">03.</span>La asignación se realiza considerando la temática de la edición mediante un sistema de doble transparencia. En primer lugar, se utiliza una ruleta con los nombres de los jugadores presentes para determinar el orden de elección. Siguiendo ese orden de elección establecido, cada participante gira una segunda ruleta con los equipos previamente seleccionados para obtener el suyo. Una vez asignado el equipo no se permiten cambios bajo ninguna circunstancia para garantizar la equidad de la competencia.</p>
-
-        <p class="regla-bloque"><span class="num-regla">04.</span>Los encuentros otorgan 3 puntos por victoria, 1 por empate y 0 por derrota, definiéndose la localía mediante piedra, papel o tijera antes de empezar. En caso de repetir cruce, se juega obligatoriamente un partido de local y otro de visitante. El formato de la competencia y la duración de los tiempos se autocalibran según la asistencia para asegurar que la jornada presencial no supere las 3 horas totales, distribuyéndose de la siguiente manera:</p>
-
-        <ul class="lista-mfl">
-            <li data-pos="•">Con 5 jugadores se disputan 15 partidos totales (6 por jugador) a 5 minutos por tiempo.</li>
-            <li data-pos="•">Con 6 jugadores se juega una liga única de todos contra todos a una sola vuelta, sumando 15 partidos a 4 minutos por tiempo.</li>
-            <li data-pos="•">Con 7 jugadores se asignan 14 partidos totales (4 por jugador) a 5 minutos por tiempo.</li>
-            <li data-pos="•">Con 8 jugadores se generan 16 partidos totales (4 por jugador) a 4 minutos por tiempo.</li>
-            <li data-pos="•">Con 9 jugadores se disputan 18 partidos totales (4 por jugador) a 3 minutos por tiempo.</li>
-            <li data-pos="•">Con 10 jugadores se desarrollan 15 partidos totales (3 por jugador) a 4 minutos por tiempo.</li>
-        </ul>
-
-        <p class="regla-bloque"><span class="num-regla">05.</span>Si dos o más participantes igualan en puntos al finalizar una edición, las posiciones se definen strictly bajo el orden de diferencia de goles, goles a favor y goles en contra. De persistir la igualdad, se consideran las tarjetas amarillas, tarjetas rojas y las faltas cometidas en el torneo. En el caso extremo de un empate absoluto en todas las estadísticas, se disputará un partido de desempate con prórroga y tanda de penales si fuera necesario.</p>
-
-        <p class="regla-bloque"><span class="num-regla">06.</span>Todos los jugadores deben mantener un comportamiento respetuoso y deportivo. Cualquier actitud antideportiva será evaluada por la organización y podrá ser sancionada con advertencias, quita de puntos, descalificación de la fecha o la expulsión directa del torneo. Las partidas se disputan bajo los parámetros predeterminados del juego sin ayudas externas de ningún tipo. Ante cualquier falla técnica irreversible o desconexión ajena a los jugadores durante un partido, el mismo se reiniciará desde cero.</p>
+        <div class="selector-slider" id="selectorReglas"></div>
+        <div class="panel-flotante" id="panelRegla"></div>
     </main>
 
     <!-- SECCIÓN: PREMIOS -->
     <main id="premios" class="seccion">
         <h1>Premios MFL<span>™</span></h1>
-        
-        <h2>Primer, Segundo y Tercer Puesto</h2>
-        <p class="regla-bloque">Estos reconocimientos se otorgan a los jugadores que hayan obtenido los tres primeros lugares en la edición, en recognition a su destacada actuación y habilidad a lo largo de la competición.</p>
-        <ul class="lista-mfl">
-            <li data-pos="•">Consultar en la sección Temporadas.</li>
-        </ul>
 
-        <h2>Cristiano Ronaldo: Máximo Goleador</h2>
-        <p class="regla-bloque">Este galardón rinde homenaje a Cristiano Ronaldo, reconocido como el máximo goleador de la historia del fútbol profesional. Se otorga al jugador o jugadores que hayan anotado la mayor cantidad de goles en la edición, en recognition a su capacidad goleadora, eficacia ofensiva y liderazgo dentro del campo de juego. Se entrega desde la edición 24x05.</p>
-        <details>
-            <summary>Ganadores</summary>
-            <div class="desplegable-contenido">
-                <ul class="lista-mfl">
-                    <li data-pos="1.">Elías Parra (24x05 • 24x06 • 25x06)</li>
-                    <li data-pos="2.">Renzo Gallegos (24x05 • 24x06 • 25x03)</li>
-                    <li data-pos="3.">Santiago Pereyra (24x05 • 25x01)</li>
-                    <li data-pos="4.">Emanuel Marqués (25x05)</li>
-                    <li data-pos="5.">Gonzalo Silva (25x04)</li>
-                    <li data-pos="6.">Agustín Marqués (25x02)</li>
-                    <li data-pos="7.">Fidel Parra (24x08)</li>
-                    <li data-pos="8.">Marcelo Silva (24x07)</li>
-                </ul>
-            </div>
-        </details>
-
-        <h2>Paolo Maldini: Mejor Defensa</h2>
-        <p class="regla-bloque">Este galardón rinde homenaje a Paolo Maldini, considerado uno de los mejores defensores de la historia del fútbol. Se otorga al jugador o jugadores con menor cantidad de goles recibidos en la edición, en reconocimiento a su solidez defensiva, disciplina táctica y capacidad para proteger a su equipo. Se entrega desde la edición 24x05.</p>
-        <details>
-            <summary>Ganadores</summary>
-            <div class="desplegable-contenido">
-                <ul class="lista-mfl">
-                    <li data-pos="1.">Elías Parra (24x05 • 24x07 • 25x04 • 25x06)</li>
-                    <li data-pos="2.">Marcelo Silva (24x05 • 24x08 • 25x07)</li>
-                    <li data-pos="3.">Santiago Pereyra (25x01 • 25x04)</li>
-                    <li data-pos="4.">Emanuel Marqués (25x05)</li>
-                    <li data-pos="5.">Franco Aguirre (25x03)</li>
-                    <li data-pos="6.">Agustín Marqués (25x02)</li>
-                    <li data-pos="7.">Fidel Parra (24x07)</li>
-                    <li data-pos="8.">Renzo Gallegos (24x06)</li>
-                </ul>
-            </div>
-        </details>
-
-        <h2>Ronaldinho: Mejor Gol</h2>
-        <p class="regla-bloque">Este galardón rinde homenaje a Ronaldinho, reconocido como uno de los futbolistas más creativos, talentosos y espectaculares de todos los tiempos. Se otorga al jugador que haya anotado el gol más destacado de la edición, ya sea por su belleza, dificultad técnica o importancia en el desarrollo del torneo. Se entrega desde la edición 24x06.</p>
-        <details>
-            <summary>Ganadores</summary>
-            <div class="desplegable-contenido">
-                <ul class="lista-mfl">
-                    <li data-pos="1.">Agustín Marqués (25x02 • 25x06)</li>
-                    <li data-pos="2.">Fidel Parra (24x07 • 25x03)</li>
-                    <li data-pos="3.">Renzo Gallegos (24x06 • 25x01)</li>
-                    <li data-pos="4.">Benjamín Márquez (25x05)</li>
-                    <li data-pos="5.">Gonzalo Silva (25x04)</li>
-                    <li data-pos="6.">Emanuel Martínez (24x08)</li>
-                </ul>
-            </div>
-        </details>
-
-        <h2>Johan Cruyff: Reconocimiento Especial</h2>
-        <p class="regla-bloque">Este reconocimiento rinde homenaje a Johan Cruyff, máximo exponente del fútbol total y ampliamente reconocido como uno de los futbolistas más completos de la historia. Se otorga una sola vez por temporada al jugador que haya demostrado un desempeño excepcional en todas las facetas del juego, destacándose tanto en ataque como en defensa, y ser el primero en obtener todos los premios posibles.</p>
-        <details>
-            <summary>Ganadores</summary>
-            <div class="desplegable-contenido">
-                <ul class="lista-mfl">
-                    <li data-pos="1.">Agustín Marqués (Temporada 2025)</li>
-                    <li data-pos="2.">Renzo Gallegos (Temporada 2024)</li>
-                </ul>
-            </div>
-        </details>
+        <div class="selector-slider" id="selectorPremios"></div>
+        <div class="panel-flotante" id="panelPremio"></div>
     </main>
 
     <!-- SECCIÓN: TEMPORADAS -->
     <main id="temporadas" class="seccion">
         <h1>Temporadas MFL<span>™</span></h1>
-        
-        <div class="bloque-temporada-actual">
-            <h2>Temporada 2025</h2>
-            
-            <details>
-                <summary>Ediciones</summary>
-                <div class="desplegable-contenido">
-                    <h2>Primera Edición (25x01)</h2>
-                    <ul class="lista-mfl">
-                        <li data-pos="1.">Santiago Pereyra – 7 puntos</li>
-                        <li data-pos="2.">Marcelo Silva – 6 puntos</li>
-                        <li data-pos="3.">Renzo Gallegos – 5 puntos</li>
-                        <li data-pos="4.">Elías Parra – 4 puntos</li>
-                        <li data-pos="5.">Emanuel Martínez – 3 puntos</li>
-                        <li data-pos="6.">Máximo Bautista – 2 puntos</li>
-                        <li data-pos="7.">Renzo Gallegos – 1 punto</li>
-                    </ul>
 
-                    <h2>Segunda Edición (25x02)</h2>
-                    <ul class="lista-mfl">
-                        <li data-pos="1.">Agustín Marqués – 12 puntos</li>
-                        <li data-pos="2.">Máximo Bautista – 11 puntos</li>
-                        <li data-pos="3.">Emanuel Marqués – 10 puntos</li>
-                        <li data-pos="4.">Gonzalo Silva – 9 puntos</li>
-                        <li data-pos="5.">Elías Parra – 8 puntos</li>
-                        <li data-pos="6.">Fidel Parra – 7 puntos</li>
-                        <li data-pos="7.">Marcelo Silva – 6 puntos</li>
-                        <li data-pos="8.">Emanuel Martínez – 5 puntos</li>
-                        <li data-pos="9.">Frank Rauchenberger – 4 puntos</li>
-                        <li data-pos="10.">Santiago Pereyra – 3 puntos</li>
-                        <li data-pos="11.">Renzo Gallegos – 2 puntos</li>
-                        <li data-pos="12.">Julián Benegas – 1 punto</li>
-                    </ul>
-
-                    <h2>Tercera Edición (25x03)</h2>
-                    <ul class="lista-mfl">
-                        <li data-pos="1.">Renzo Gallegos – 11 puntos</li>
-                        <li data-pos="2.">Agustín Marqués – 10 puntos</li>
-                        <li data-pos="3.">Emanuel Marqués – 9 puntos</li>
-                        <li data-pos="4.">Marcelo Silva – 8 puntos</li>
-                        <li data-pos="5.">Benjamín Márquez – 7 puntos</li>
-                        <li data-pos="6.">Franco Aguirre – 6 puntos</li>
-                        <li data-pos="7.">Santiago Pereyra – 5 puntos</li>
-                        <li data-pos="8.">Elías Parra – 4 puntos</li>
-                        <li data-pos="9.">Máximo Bautista – 3 puntos</li>
-                        <li data-pos="10.">Fidel Parra – 2 puntos</li>
-                        <li data-pos="11.">Mariano Miranda – 1 punto</li>
-                    </ul>
-
-                    <h2>Cuarta Edición (25x04)</h2>
-                    <ul class="lista-mfl">
-                        <li data-pos="1.">Gonzalo Silva – 8 puntos</li>
-                        <li data-pos="2.">Santiago Pereyra – 7 puntos</li>
-                        <li data-pos="3.">Marcelo Silva – 6 puntos</li>
-                        <li data-pos="4.">Elías Parra – 5 puntos</li>
-                        <li data-pos="5.">Emanuel Martínez – 4 puntos</li>
-                        <li data-pos="6.">Renzo Gallegos – 3 puntos</li>
-                        <li data-pos="7.">Fidel Parra – 2 puntos</li>
-                        <li data-pos="8.">Máximo Bautista – 1 punto</li>
-                    </ul>
-
-                    <h2>Quinta Edición (25x05)</h2>
-                    <ul class="lista-mfl">
-                        <li data-pos="1.">Emanuel Marqués – 8 puntos</li>
-                        <li data-pos="2.">Gonzalo Silva – 7 puntos</li>
-                        <li data-pos="3.">Agustín Marqués – 6 puntos</li>
-                        <li data-pos="4.">Benjamín Márquez – 5 puntos</li>
-                        <li data-pos="5.">Marcelo Silva – 4 puntos</li>
-                        <li data-pos="6.">Santiago Pereyra – 3 puntos</li>
-                        <li data-pos="7.">Renzo Gallegos – 2 puntos</li>
-                        <li data-pos="8.">Tobías Márquez – 1 punto</li>
-                    </ul>
-
-                    <h2>Sexta Edición (25x06)</h2>
-                    <ul class="lista-mfl">
-                        <li data-pos="1.">Elías Parra – 8 puntos</li>
-                        <li data-pos="2.">Marcelo Silva – 7 puntos</li>
-                        <li data-pos="3.">Gonzalo Silva – 6 puntos</li>
-                        <li data-pos="4.">Benjamín Márquez – 5 puntos</li>
-                        <li data-pos="5.">Agustín Marqués – 4 puntos</li>
-                        <li data-pos="6.">Emanuel Marqués – 3 puntos</li>
-                        <li data-pos="7.">Fidel Parra – 2 puntos</li>
-                        <li data-pos="8.">Máximo Bautista – 1 punto</li>
-                    </ul>
-
-                    <h2>Séptima Edición (25x07)</h2>
-                    <ul class="lista-mfl">
-                        <li data-pos="1.">Elías Parra – 5 puntos</li>
-                        <li data-pos="2.">Marcelo Silva – 4 puntos</li>
-                        <li data-pos="3.">Gonzalo Silva – 3 puntos</li>
-                        <li data-pos="4.">Santiago Pereyra – 2 puntos</li>
-                        <li data-pos="5.">Fidel Parra – 1 punto</li>
-                    </ul>
-                </div>
-            </details>
-
-            <details>
-                <summary>Rankings</summary>
-                <div class="desplegable-contenido">
-                    <h2>Tabla General por Puntaje</h2>
-                    <ul class="lista-mfl">
-                        <li data-pos="1.">Marcelo Silva – 41 puntos</li>
-                        <li data-pos="2.">Elías Parra – 34 puntos</li>
-                        <li data-pos="3.">Gonzalo Silva – 33 puntos</li>
-                        <li data-pos="4.">Agustín Marqués – 32 puntos</li>
-                        <li data-pos="5.">Emanuel Marqués – 30 puntos</li>
-                        <li data-pos="6.">Santiago Pereyra – 27 puntos</li>
-                        <li data-pos="7.">Renzo Gallegos – 24 puntos</li>
-                        <li data-pos="8.">Máximo Bautista – 18 puntos</li>
-                        <li data-pos="9.">Benjamín Márquez – 17 puntos</li>
-                        <li data-pos="10.">Emanuel Martínez – 17 puntos</li>
-                        <li data-pos="11.">Fidel Parra – 14 puntos</li>
-                        <li data-pos="12.">Franco Aguirre – 6 puntos</li>
-                        <li data-pos="13.">Frank Rauchenberger – 4 puntos</li>
-                        <li data-pos="14.">Julián Benegas – 1 punto</li>
-                        <li data-pos="15.">Mariano Miranda – 1 punto</li>
-                        <li data-pos="16.">Tobías Márquez – 1 punto</li>
-                    </ul>
-
-                    <h2>Tabla General por Promedio</h2>
-                    <ul class="lista-mfl">
-                        <li data-pos="1.">Agustín Marqués – 4 ediciones – 8 puntos</li>
-                        <li data-pos="2.">Emanuel Marqués – 4 ediciones – 7,5 puntos</li>
-                        <li data-pos="3.">Gonzalo Silva – 5 ediciones – 6,6 puntos</li>
-                        <li data-pos="4.">Franco Aguirre – 1 edición – 6 puntos</li>
-                        <li data-pos="5.">Marcelo Silva – 7 ediciones – 5,8 puntos</li>
-                        <li data-pos="6.">Benjamín Márquez – 3 ediciones – 5,7 puntos</li>
-                        <li data-pos="7.">Elías Parra – 6 ediciones – 5,6 puntos</li>
-                        <li data-pos="8.">Santiago Pereyra – 5 ediciones – 5,4 puntos</li>
-                        <li data-pos="9.">Renzo Gallegos – 5 ediciones – 4,8 puntos</li>
-                        <li data-pos="10.">Emanuel Martínez – 4 ediciones – 4,3 puntos</li>
-                        <li data-pos="11.">Frank Rauchenberger – 1 edición – 4 puntos</li>
-                        <li data-pos="12.">Máximo Bautista – 5 ediciones – 3,6 puntos</li>
-                        <li data-pos="13.">Fidel Parra – 5 ediciones – 2,8 puntos</li>
-                        <li data-pos="14.">Julián Benegas – 1 edición – 1 punto</li>
-                        <li data-pos="15.">Mariano Miranda – 1 edición – 1 punto</li>
-                        <li data-pos="16.">Tobías Márquez – 1 punto</li>
-                    </ul>
-                </div>
-            </details>
-        </div>
-
-        <div class="bloque-temporada-anterior">
-            <h2>Temporada 2024</h2>
-            
-            <details>
-                <summary>Ediciones</summary>
-                <div class="desplegable-contenido">
-                    <h2>Primera Edición (24x01)</h2>
-                    <ul class="lista-mfl">
-                        <li data-pos="1.">Santiago Pereyra – 6 puntos</li>
-                        <li data-pos="2.">Marcelo Silva – 5 puntos</li>
-                        <li data-pos="3.">Gonzalo Silva – 4 puntos</li>
-                        <li data-pos="4.">Elías Parra – 3 puntos</li>
-                        <li data-pos="5.">Renzo Gallegos – 2 puntos</li>
-                        <li data-pos="6.">Emanuel Martínez – 1 punto</li>
-                    </ul>
-
-                    <h2>Segunda Edición (24x02)</h2>
-                    <ul class="lista-mfl">
-                        <li data-pos="1.">Marcelo Silva – 6 puntos</li>
-                        <li data-pos="2.">Gonzalo Silva – 5 puntos</li>
-                        <li data-pos="3.">Renzo Gallegos – 4 puntos</li>
-                        <li data-pos="4.">Elías Parra – 3 puntos</li>
-                        <li data-pos="5.">Emanuel Martínez – 2 puntos</li>
-                        <li data-pos="6.">Santiago Pereyra – 1 punto</li>
-                    </ul>
-
-                    <h2>Tercera Edición (24x03)</h2>
-                    <ul class="lista-mfl">
-                        <li data-pos="1.">Marcelo Silva – 5 puntos</li>
-                        <li data-pos="2.">Elías Parra – 4 puntos</li>
-                        <li data-pos="3.">Emanuel Martínez – 3 puntos</li>
-                        <li data-pos="4.">Gonzalo Silva – 2 puntos</li>
-                        <li data-pos="5.">Fidel Parra – 1 punto</li>
-                    </ul>
-
-                    <h2>Cuarta Edición (24x04)</h2>
-                    <ul class="lista-mfl">
-                        <li data-pos="1.">Elías Parra – 8 puntos</li>
-                        <li data-pos="2.">Marcelo Silva – 7 puntos</li>
-                        <li data-pos="3.">Gonzalo Silva – 6 puntos</li>
-                        <li data-pos="4.">Emanuel Martínez – 5 puntos</li>
-                        <li data-pos="5.">Fidel Parra – 4 puntos</li>
-                        <li data-pos="6.">Santiago Pereyra – 3 puntos</li>
-                        <li data-pos="7.">Renzo Gallegos – 2 puntos</li>
-                        <li data-pos="8.">Valentín Roldán – 1 punto</li>
-                    </ul>
-
-                    <h2>Quinta Edición (24x05)</h2>
-                    <ul class="lista-mfl">
-                        <li data-pos="1.">Elías Parra – 7 puntos</li>
-                        <li data-pos="2.">Renzo Gallegos – 6 puntos</li>
-                        <li data-pos="3.">Marcelo Silva – 5 puntos</li>
-                        <li data-pos="4.">Santiago Pereyra – 4 puntos</li>
-                        <li data-pos="5.">Gonzalo Silva – 3 puntos</li>
-                        <li data-pos="6.">Fidel Parra – 2 puntos</li>
-                        <li data-pos="7.">Emanuel Martínez – 1 punto</li>
-                    </ul>
-
-                    <h2>Sexta Edición (24x06)</h2>
-                    <ul class="lista-mfl">
-                        <li data-pos="1.">Renzo Gallegos – 7 puntos</li>
-                        <li data-pos="2.">Marcelo Silva – 6 puntos</li>
-                        <li data-pos="3.">Elías Parra – 5 puntos</li>
-                        <li data-pos="4.">Santiago Pereyra – 4 puntos</li>
-                        <li data-pos="5.">Tomás Donati – 3 puntos</li>
-                        <li data-pos="6.">Fidel Parra – 2 puntos</li>
-                        <li data-pos="7.">Máximo Bautista – 1 punto</li>
-                    </ul>
-
-                    <h2>Séptima Edición (24x07)</h2>
-                    <ul class="lista-mfl">
-                        <li data-pos="1.">Fidel Parra – 8 puntos</li>
-                        <li data-pos="2.">Marcelo Silva – 7 puntos</li>
-                        <li data-pos="3.">Gonzalo Silva – 6 puntos</li>
-                        <li data-pos="4.">Emanuel Martínez – 5 puntos</li>
-                        <li data-pos="5.">Elías Parra – 4 puntos</li>
-                        <li data-pos="6.">Santiago Pereyra – 3 puntos</li>
-                        <li data-pos="7.">Renzo Gallegos – 2 puntos</li>
-                        <li data-pos="8.">Máximo Bautista – 1 punto</li>
-                    </ul>
-
-                    <h2>Octava Edición (24x08)</h2>
-                    <ul class="lista-mfl">
-                        <li data-pos="1.">Marcelo Silva – 7 puntos</li>
-                        <li data-pos="2.">Gonzalo Silva – 6 puntos</li>
-                        <li data-pos="3.">Elías Parra – 5 puntos</li>
-                        <li data-pos="4.">Fidel Parra – 4 puntos</li>
-                        <li data-pos="5.">Tomás Donati – 3 puntos</li>
-                        <li data-pos="6.">Máximo Bautista – 2 puntos</li>
-                        <li data-pos="7.">Emanuel Martínez – 1 punto</li>
-                    </ul>
-                </div>
-            </details>
-
-            <details>
-                <summary>Rankings</summary>
-                <div class="desplegable-contenido">
-                    <h2>Tabla General por Puntaje</h2>
-                    <ul class="lista-mfl">
-                        <li data-pos="1.">Marcelo Silva – 48 puntos</li>
-                        <li data-pos="2.">Elías Parra – 39 puntos</li>
-                        <li data-pos="3.">Gonzalo Silva – 32 puntos</li>
-                        <li data-pos="4.">Renzo Gallegos – 22 puntos</li>
-                        <li data-pos="5.">Fidel Parra – 21 puntos</li>
-                        <li data-pos="6.">Santiago Pereyra – 21 puntos</li>
-                        <li data-pos="7.">Emanuel Martínez – 18 puntos</li>
-                        <li data-pos="8.">Tomás Donati – 6 puntos</li>
-                        <li data-pos="9.">Máximo Bautista – 4 puntos</li>
-                        <li data-pos="10.">Valentín Roldán – 1 punto</li>
-                    </ul>
-
-                    <h2>Tabla General por Promedio</h2>
-                    <ul class="lista-mfl">
-                        <li data-pos="1.">Marcelo Silva – 8 ediciones – 6 puntos</li>
-                        <li data-pos="2.">Elías Parra – 8 ediciones – 4,9 puntos</li>
-                        <li data-pos="3.">Gonzalo Silva – 7 ediciones – 4,6 puntos</li>
-                        <li data-pos="4.">Renzo Gallegos – 6 ediciones – 3,7 puntos</li>
-                        <li data-pos="5.">Fidel Parra – 6 ediciones – 3,5 puntos</li>
-                        <li data-pos="6.">Santiago Pereyra – 6 ediciones – 3,5 puntos</li>
-                        <li data-pos="7.">Tomás Donati – 2 ediciones – 3 puntos</li>
-                        <li data-pos="8.">Emanuel Martínez – 7 ediciones – 2,6 puntos</li>
-                        <li data-pos="9.">Máximo Bautista – 3 ediciones – 1,3 puntos</li>
-                        <li data-pos="10.">Valentín Roldán – 1 edición – 1 punto</li>
-                    </ul>
-                </div>
-            </details>
-        </div>
+        <div class="selector-slider" id="selectorAnios"></div>
+        <div class="panel-flotante" id="panelAnio"></div>
     </main>
 
     <!-- SECCIÓN: EVENTOS -->
     <main id="eventos" class="seccion">
         <h1>Eventos MFL<span>™</span></h1>
-        <h2>Próxima Edición</h2>
-        <ul class="lista-mfl">
-            <li data-pos="•"><strong>Fecha:</strong> Viernes 10 de Julio de 2026</li>
-            <li data-pos="•"><strong>Edición:</strong> Primera Edición (26x01)</li>
-            <li data-pos="•"><strong>Temática:</strong> Clubes de Europa (Everton, Lazio, Lyon, O. Marseille, Roma)</li>
-            <li data-pos="•"><strong>Ubicación:</strong> Ver evento en la comunidad de WhatsApp</li>
-        </ul>
-        
-        <!-- REPRODUCTOR DE VIDEO DE LA EDICIÓN -->
-        <div class="video-contenedor">
-            <iframe src="https://www.youtube.com/embed/B4399k3CY0k" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
-        </div>
-
-        <h2>Fixture de Partidos</h2>
-        <p class="regla-bloque"><strong>Partido 1:</strong> Eagles FC (SS Lazio) vs Brightlight FC (O. Lyon)</p>
-        <p class="regla-bloque"><strong>Partido 2:</strong> Imperial FC (AS Roma) vs Princetower FC (Everton)</p>
-        <p class="regla-bloque"><strong>Partido 3:</strong> FC South (O. Marseille) vs Eagles FC (SS Lazio) (sortear localía)</p>
-        <p class="regla-bloque"><strong>Partido 4:</strong> Brightlight FC (O. Lyon) vs Imperial FC (AS Roma) (sortear localía)</p>
-        <p class="regla-bloque"><strong>Partido 5:</strong> Princetower FC (Everton) vs FC South (O. Marseille)</p>
-        <p class="regla-bloque"><strong>Partido 6:</strong> Eagles FC (SS Lazio) vs Imperial FC (AS Roma)</p>
-        <p class="regla-bloque"><strong>Partido 7:</strong> Brightlight FC (O. Lyon) vs Princetower FC (Everton) (sortear localía)</p>
-        <p class="regla-bloque"><strong>Partido 8:</strong> FC South (O. Marseille) vs Imperial FC (AS Roma) (sortear localía)</p>
-        <p class="regla-bloque"><strong>Partido 9:</strong> Princetower FC (Everton) vs Eagles FC (SS Lazio) (sortear localía)</p>
-        <p class="regla-bloque"><strong>Partido 10:</strong> Brightlight FC (O. Lyon) vs FC South (O. Marseille)</p>
-        <p class="regla-bloque"><strong>Partido 11:</strong> Imperial FC (AS Roma) vs Eagles FC (SS Lazio)</p>
-        <p class="regla-bloque"><strong>Partido 12:</strong> FC South (O. Marseille) vs Princetower FC (Everton)</p>
-        <p class="regla-bloque"><strong>Partido 13:</strong> Brightlight FC (O. Lyon) vs Eagles FC (SS Lazio)</p>
-        <p class="regla-bloque"><strong>Partido 14:</strong> Princetower FC (Everton) vs Imperial FC (AS Roma)</p>
-        <p class="regla-bloque"><strong>Partido 15:</strong> FC South (O. Marseille) vs Brightlight FC (O. Lyon)</p>
+        <p class="manifiesto-portada">Próximamente.</p>
     </main>
 
     <!-- SECCIÓN: HISTÓRICO CONSOLIDADO -->
     <main id="historico" class="seccion">
         <h1>Histórico MFL<span>™</span></h1>
-        
-        <h2>Tabla General Histórica por Puntaje</h2>
-        <ul class="lista-mfl">
-            <li data-pos="1.">Marcelo Silva – 89 puntos</li>
-            <li data-pos="2.">Elías Parra – 73 puntos</li>
-            <li data-pos="3.">Gonzalo Silva – 65 puntos</li>
-            <li data-pos="4.">Santiago Pereyra – 48 puntos</li>
-            <li data-pos="5.">Renzo Gallegos – 46 puntos</li>
-            <li data-pos="6.">Fidel Parra – 35 puntos</li>
-            <li data-pos="7.">Emanuel Martínez – 35 puntos</li>
-            <li data-pos="8.">Agustín Marqués – 32 puntos</li>
-            <li data-pos="9.">Emanuel Marqués – 30 puntos</li>
-            <li data-pos="10.">Máximo Bautista – 22 puntos</li>
-            <li data-pos="11.">Benjamín Márquez – 17 puntos</li>
-            <li data-pos="12.">Tomás Donati – 6 puntos</li>
-            <li data-pos="13.">Franco Aguirre – 6 puntos</li>
-            <li data-pos="14.">Frank Rauchenberger – 4 puntos</li>
-            <li data-pos="15.">Valentín Roldán – 1 punto</li>
-            <li data-pos="16.">Julián Benegas – 1 punto</li>
-            <li data-pos="17.">Mariano Miranda – 1 punto</li>
-            <li data-pos="18.">Tobías Márquez – 1 punto</li>
-        </ul>
 
-        <h2>Tabla General Histórica por Promedio</h2>
-        <ul class="lista-mfl">
-            <li data-pos="1.">Agustín Marqués – 4 ediciones – 8 puntos</li>
-            <li data-pos="2.">Emanuel Marqués – 4 ediciones – 7,5 puntos</li>
-            <li data-pos="3.">Franco Aguirre – 1 edición – 6 puntos</li>
-            <li data-pos="4.">Marcelo Silva – 15 ediciones – 5,9 puntos</li>
-            <li data-pos="5.">Benjamín Márquez – 3 ediciones – 5,7 puntos</li>
-            <li data-pos="6.">Gonzalo Silva – 12 ediciones – 5,4 puntos</li>
-            <li data-pos="7.">Elías Parra – 14 ediciones – 5,2 puntos</li>
-            <li data-pos="8.">Santiago Pereyra – 11 ediciones – 4,4 puntos</li>
-            <li data-pos="9.">Frank Rauchenberger – 1 edición – 4 puntos</li>
-            <li data-pos="10.">Renzo Gallegos – 11 ediciones – 4,2 puntos</li>
-            <li data-pos="11.">Tomás Donati – 2 ediciones – 3 puntos</li>
-            <li data-pos="12.">Fidel Parra – 11 ediciones – 3,2 puntos</li>
-            <li data-pos="13.">Emanuel Martínez – 11 ediciones – 3,2 puntos</li>
-            <li data-pos="14.">Máximo Bautista – 8 ediciones – 2,8 puntos</li>
-            <li data-pos="15.">Valentín Roldán – 1 edición – 1 punto</li>
-            <li data-pos="16.">Julián Benegas – 1 edición – 1 punto</li>
-            <li data-pos="17.">Mariano Miranda – 1 edición – 1 punto</li>
-            <li data-pos="18.">Tobías Márquez – 1 punto</li>
-        </ul>
+        <div class="selector-slider" id="selectorHistorico"></div>
+        <div class="panel-flotante" id="panelHistorico"></div>
     </main>
 
     <footer>© 2026 • M.A.F.I.A. • smarchs STUDIOS</footer>
 
     <script>
+        /* ============================================================
+           FUENTE ÚNICA DE DATOS
+           Para cargar una edición nueva: agregar su código dentro del
+           año correspondiente (o crear el año si es el primero) con el
+           título y los resultados ya ordenados [nombre, puntos].
+           Todo lo demás (tablas generales, promedios e histórico) se
+           recalcula solo. No tocar nada más.
+           ============================================================ */
+        const DATOS = {
+            2026: {
+                "26x01": { titulo: "Primera Edición", resultados: [
+                    ["Renzo Gallegos", 5], ["Elías Parra", 4], ["Marcelo Silva", 3], ["Gonzalo Silva", 2], ["Fidel Parra", 1]
+                ]}
+            },
+            2025: {
+                "25x01": { titulo: "Primera Edición", resultados: [
+                    ["Santiago Pereyra", 6], ["Marcelo Silva", 5], ["Renzo Gallegos", 4], ["Elías Parra", 3], ["Emanuel Martínez", 2], ["Máximo Bautista", 1]
+                ]},
+                "25x02": { titulo: "Segunda Edición", resultados: [
+                    ["Agustín Marqués", 12], ["Máximo Bautista", 11], ["Emanuel Marqués", 10], ["Gonzalo Silva", 9], ["Elías Parra", 8], ["Fidel Parra", 7], ["Marcelo Silva", 6], ["Emanuel Martínez", 5], ["Frank Rauchenberger", 4], ["Santiago Pereyra", 3], ["Renzo Gallegos", 2], ["Julián Benegas", 1]
+                ]},
+                "25x03": { titulo: "Tercera Edición", resultados: [
+                    ["Renzo Gallegos", 11], ["Agustín Marqués", 10], ["Emanuel Marqués", 9], ["Marcelo Silva", 8], ["Benjamín Márquez", 7], ["Franco Aguirre", 6], ["Santiago Pereyra", 5], ["Elías Parra", 4], ["Máximo Bautista", 3], ["Fidel Parra", 2], ["Mariano Miranda", 1]
+                ]},
+                "25x04": { titulo: "Cuarta Edición", resultados: [
+                    ["Gonzalo Silva", 8], ["Santiago Pereyra", 7], ["Marcelo Silva", 6], ["Elías Parra", 5], ["Emanuel Martínez", 4], ["Renzo Gallegos", 3], ["Fidel Parra", 2], ["Máximo Bautista", 1]
+                ]},
+                "25x05": { titulo: "Quinta Edición", resultados: [
+                    ["Emanuel Marqués", 8], ["Gonzalo Silva", 7], ["Agustín Marqués", 6], ["Benjamín Márquez", 5], ["Marcelo Silva", 4], ["Santiago Pereyra", 3], ["Renzo Gallegos", 2], ["Tobías Márquez", 1]
+                ]},
+                "25x06": { titulo: "Sexta Edición", resultados: [
+                    ["Elías Parra", 8], ["Marcelo Silva", 7], ["Gonzalo Silva", 6], ["Benjamín Márquez", 5], ["Agustín Marqués", 4], ["Emanuel Marqués", 3], ["Fidel Parra", 2], ["Máximo Bautista", 1]
+                ]},
+                "25x07": { titulo: "Séptima Edición", resultados: [
+                    ["Elías Parra", 5], ["Marcelo Silva", 4], ["Gonzalo Silva", 3], ["Santiago Pereyra", 2], ["Fidel Parra", 1]
+                ]}
+            },
+            2024: {
+                "24x01": { titulo: "Primera Edición", resultados: [
+                    ["Santiago Pereyra", 6], ["Marcelo Silva", 5], ["Gonzalo Silva", 4], ["Elías Parra", 3], ["Renzo Gallegos", 2], ["Emanuel Martínez", 1]
+                ]},
+                "24x02": { titulo: "Segunda Edición", resultados: [
+                    ["Marcelo Silva", 6], ["Gonzalo Silva", 5], ["Renzo Gallegos", 4], ["Elías Parra", 3], ["Emanuel Martínez", 2], ["Santiago Pereyra", 1]
+                ]},
+                "24x03": { titulo: "Tercera Edición", resultados: [
+                    ["Marcelo Silva", 5], ["Elías Parra", 4], ["Emanuel Martínez", 3], ["Gonzalo Silva", 2], ["Fidel Parra", 1]
+                ]},
+                "24x04": { titulo: "Cuarta Edición", resultados: [
+                    ["Elías Parra", 8], ["Marcelo Silva", 7], ["Gonzalo Silva", 6], ["Emanuel Martínez", 5], ["Fidel Parra", 4], ["Santiago Pereyra", 3], ["Renzo Gallegos", 2], ["Valentín Roldán", 1]
+                ]},
+                "24x05": { titulo: "Quinta Edición", resultados: [
+                    ["Elías Parra", 7], ["Renzo Gallegos", 6], ["Marcelo Silva", 5], ["Santiago Pereyra", 4], ["Gonzalo Silva", 3], ["Fidel Parra", 2], ["Emanuel Martínez", 1]
+                ]},
+                "24x06": { titulo: "Sexta Edición", resultados: [
+                    ["Renzo Gallegos", 7], ["Marcelo Silva", 6], ["Elías Parra", 5], ["Santiago Pereyra", 4], ["Tomás Donati", 3], ["Fidel Parra", 2], ["Máximo Bautista", 1]
+                ]},
+                "24x07": { titulo: "Séptima Edición", resultados: [
+                    ["Fidel Parra", 8], ["Marcelo Silva", 7], ["Gonzalo Silva", 6], ["Emanuel Martínez", 5], ["Elías Parra", 4], ["Santiago Pereyra", 3], ["Renzo Gallegos", 2], ["Máximo Bautista", 1]
+                ]},
+                "24x08": { titulo: "Octava Edición", resultados: [
+                    ["Marcelo Silva", 7], ["Gonzalo Silva", 6], ["Elías Parra", 5], ["Fidel Parra", 4], ["Tomás Donati", 3], ["Máximo Bautista", 2], ["Emanuel Martínez", 1]
+                ]}
+            }
+        };
+
+        /* ============================================================
+           MOTOR DE CÁLCULO
+           ============================================================ */
+        function calcularTotales(ediciones) {
+            const totales = {}, ediciones_jugadas = {};
+            Object.values(ediciones).forEach(ed => {
+                ed.resultados.forEach(([nombre, pts]) => {
+                    totales[nombre] = (totales[nombre] || 0) + pts;
+                    ediciones_jugadas[nombre] = (ediciones_jugadas[nombre] || 0) + 1;
+                });
+            });
+            return { totales, ediciones_jugadas };
+        }
+
+        /* Índice (posición cronológica) de la última edición en la que jugó un nombre,
+           dentro del ámbito recibido. Se usa como criterio de desempate: jugar más
+           recientemente pesa más que haber jugado hace tiempo. -1 si nunca jugó. */
+        function indiceUltimaEdicion(nombre, ediciones) {
+            const codigos = Object.keys(ediciones);
+            let ultimo = -1;
+            codigos.forEach((codigo, i) => {
+                if (ediciones[codigo].resultados.some(([n]) => n === nombre)) ultimo = i;
+            });
+            return ultimo;
+        }
+
+        function ordenarPorPuntaje(ediciones, totales, ediciones_jugadas) {
+            return Object.entries(totales).sort((a, b) => {
+                if (b[1] !== a[1]) return b[1] - a[1];
+                const edA = ediciones_jugadas[a[0]], edB = ediciones_jugadas[b[0]];
+                if (edA !== edB) return edA - edB;
+                const ultA = indiceUltimaEdicion(a[0], ediciones), ultB = indiceUltimaEdicion(b[0], ediciones);
+                if (ultB !== ultA) return ultB - ultA;
+                return a[0].localeCompare(b[0], 'es');
+            });
+        }
+
+        /* Coeficiente MFL: a cada jugador se le suman "m" ediciones fantasma de
+           rendimiento promedio antes de calcular su promedio. "m" se recalcula solo
+           como la mitad (1/K_COEFICIENTE) del total de ediciones jugadas en ese
+           ámbito (la temporada o el histórico), así el ajuste crece a medida que el
+           torneo acumula más ediciones. Esto evita que alguien con una sola edición
+           muy buena le gane en promedio a alguien constante con muchas ediciones.
+           Explicado en detalle en Reglamento, regla 02. */
+        const K_COEFICIENTE = 2;
+
+        function mediaGlobal(ediciones) {
+            let suma = 0, cuenta = 0;
+            Object.values(ediciones).forEach(ed => ed.resultados.forEach(([, pts]) => { suma += pts; cuenta++; }));
+            return cuenta ? suma / cuenta : 0;
+        }
+
+        function ordenarPorCoeficienteMFL(ediciones, totales, ediciones_jugadas) {
+            const m = Object.keys(ediciones).length / K_COEFICIENTE;
+            const media = mediaGlobal(ediciones);
+            return Object.entries(totales)
+                .map(([nombre, pts]) => {
+                    const n = ediciones_jugadas[nombre];
+                    const ponderado = (pts + m * media) / (n + m);
+                    return [nombre, n, pts, ponderado];
+                })
+                .sort((a, b) => {
+                    if (Math.abs(b[3] - a[3]) > 0.0001) return b[3] - a[3];
+                    if (b[1] !== a[1]) return b[1] - a[1];
+                    const ultA = indiceUltimaEdicion(a[0], ediciones), ultB = indiceUltimaEdicion(b[0], ediciones);
+                    if (ultB !== ultA) return ultB - ultA;
+                    return a[0].localeCompare(b[0], 'es');
+                });
+        }
+
+        function formatearPromedio(promedio) {
+            let texto = promedio.toFixed(1).replace('.', ',');
+            if (texto.endsWith(',0')) texto = texto.slice(0, -2);
+            return texto;
+        }
+
+        function liPuntaje([nombre, pts], i) {
+            return `<li data-pos="${i + 1}.">${nombre} – ${pts} ${pts === 1 ? 'punto' : 'puntos'}</li>`;
+        }
+
+        function liPromedio([nombre, ediciones, pts, promedio], i) {
+            const texto = formatearPromedio(promedio);
+            const esUnPunto = parseFloat(texto.replace(',', '.')) === 1;
+            const palabraEdicion = ediciones === 1 ? 'edición' : 'ediciones';
+            return `<li data-pos="${i + 1}.">${nombre} – ${ediciones} ${palabraEdicion} – ${texto} ${esUnPunto ? 'punto' : 'puntos'}</li>`;
+        }
+
+        function renderEdicionesHTML(anio) {
+            const ediciones = DATOS[anio];
+            const codigos = Object.keys(ediciones);
+            const botones = codigos.map((codigo, i) =>
+                `<button class="btn-edicion${i === 0 ? ' activo' : ''}" data-codigo="${codigo}" onclick="mostrarEdicion(this)">${String(i + 1).padStart(2, '0')}</button>`
+            ).join('');
+            const primeraOrdenada = [...ediciones[codigos[0]].resultados].sort((a, b) => b[1] - a[1]);
+            const tablaInicial = `<ul class="lista-mfl">${primeraOrdenada.map(liPuntaje).join('')}</ul>`;
+            return `<div class="selector-ediciones">${botones}</div><div class="tabla-edicion entrar">${tablaInicial}</div>`;
+        }
+
+        function mostrarEdicion(boton) {
+            const codigo = boton.dataset.codigo;
+            const contenedorBotones = boton.parentElement;
+            contenedorBotones.querySelectorAll('.btn-edicion').forEach(b => b.classList.toggle('activo', b === boton));
+
+            let edicion = null;
+            for (const anio in DATOS) {
+                if (DATOS[anio][codigo]) { edicion = DATOS[anio][codigo]; break; }
+            }
+            const ordenado = [...edicion.resultados].sort((a, b) => b[1] - a[1]);
+
+            const tabla = contenedorBotones.nextElementSibling;
+            tabla.classList.remove('entrar');
+            tabla.innerHTML = `<ul class="lista-mfl">${ordenado.map(liPuntaje).join('')}</ul>`;
+            void tabla.offsetWidth;
+            tabla.classList.add('entrar');
+        }
+
+        function renderRankingsHTML(ediciones) {
+            const { totales, ediciones_jugadas } = calcularTotales(ediciones);
+            const tablaInicial = `<ul class="lista-mfl">${ordenarPorPuntaje(ediciones, totales, ediciones_jugadas).map(liPuntaje).join('')}</ul>`;
+            return `<div class="selector-ediciones">
+                        <button class="btn-edicion activo" data-tipo="puntaje" onclick="mostrarRankingTemporada(this)">PTS</button>
+                        <button class="btn-edicion" data-tipo="mfl" onclick="mostrarRankingTemporada(this)">MFL</button>
+                    </div>
+                    <div class="tabla-edicion entrar">${tablaInicial}</div>`;
+        }
+
+        function mostrarRankingTemporada(boton) {
+            const tipo = boton.dataset.tipo;
+            const contenedorBotones = boton.parentElement;
+            contenedorBotones.querySelectorAll('.btn-edicion').forEach(b => b.classList.toggle('activo', b === boton));
+
+            const anioActivo = document.querySelector('#selectorAnios .btn-slider.activo').dataset.valor;
+            const ediciones = DATOS[anioActivo];
+            const { totales, ediciones_jugadas } = calcularTotales(ediciones);
+            const html = tipo === 'mfl'
+                ? `<ul class="lista-mfl">${ordenarPorCoeficienteMFL(ediciones, totales, ediciones_jugadas).map(liPromedio).join('')}</ul>`
+                : `<ul class="lista-mfl">${ordenarPorPuntaje(ediciones, totales, ediciones_jugadas).map(liPuntaje).join('')}</ul>`;
+
+            const tabla = contenedorBotones.nextElementSibling;
+            tabla.classList.remove('entrar');
+            tabla.innerHTML = html;
+            void tabla.offsetWidth;
+            tabla.classList.add('entrar');
+        }
+
+        function renderTemporadaHTML(anio) {
+            return `
+                <details>
+                    <summary>Ediciones</summary>
+                    <div class="desplegable-contenido">${renderEdicionesHTML(anio)}</div>
+                </details>
+                <details>
+                    <summary>Rankings</summary>
+                    <div class="desplegable-contenido">${renderRankingsHTML(DATOS[anio])}</div>
+                </details>`;
+        }
+
+        function calcularTotalesHistoricos() {
+            const totales = {}, ediciones_jugadas = {};
+            Object.keys(DATOS).forEach(anio => {
+                const t = calcularTotales(DATOS[anio]);
+                Object.keys(t.totales).forEach(nombre => {
+                    totales[nombre] = (totales[nombre] || 0) + t.totales[nombre];
+                    ediciones_jugadas[nombre] = (ediciones_jugadas[nombre] || 0) + t.ediciones_jugadas[nombre];
+                });
+            });
+            return { totales, ediciones_jugadas };
+        }
+
+        function todasLasEdicionesCombinadas() {
+            const todas = {};
+            Object.keys(DATOS).forEach(anio => Object.assign(todas, DATOS[anio]));
+            return todas;
+        }
+
+        function renderHistoricoTabla(tipo) {
+            const ediciones = todasLasEdicionesCombinadas();
+            const { totales, ediciones_jugadas } = calcularTotalesHistoricos();
+            if (tipo === 'mfl') {
+                return `<ul class="lista-mfl">${ordenarPorCoeficienteMFL(ediciones, totales, ediciones_jugadas).map(liPromedio).join('')}</ul>`;
+            }
+            return `<ul class="lista-mfl">${ordenarPorPuntaje(ediciones, totales, ediciones_jugadas).map(liPuntaje).join('')}</ul>`;
+        }
+
+        /* ============================================================
+           REGLAMENTO — datos + render
+           ============================================================ */
+        const REGLAS = [
+            { num: '01', texto: 'El torneo se organiza en temporadas divididas en ediciones de temática variable a lo largo del año. Para cada edición se confecciona una tabla de posiciones específica donde el ganador se lleva tantos puntos como participantes jueguen esa fecha; por ejemplo, en una edición de 10 jugadores, el primero suma 10 puntos. El último clasificado siempre obtiene 1 punto y el resto escala de forma proporcional. En paralelo, las Tablas Generales de la temporada acumulan y/o promedian los puntos obtenidos en cada edición para definir a los campeones absolutos.' },
+            { num: '02', texto: 'Las Tablas Generales son dos: una se basa en la sumatoria directa de los puntos obtenidos en ese ámbito, y la otra se basa en el promedio de los puntos obtenidos y la cantidad de ediciones disputadas por cada jugador, afectado a su vez por un factor de ajuste que denominamos el Coeficiente MFL. Sin este factor, alguien que jugó una sola edición y le fue muy bien superaría en el ranking a quien jugó muchas veces con buen nivel. Se calcula así: se toma el total de ediciones jugadas en ese ámbito —la temporada o el histórico— y se suma la mitad de esa cantidad tanto a las ediciones de cada jugador como a sus puntos, usando para esa parte extra el promedio general de puntos del ámbito. Por ejemplo: con 8 ediciones en una temporada se suman 4; con 16 en el histórico, se suman 8. Después se divide el total de puntos (los reales más los sumados) entre el total de ediciones (las reales más las sumadas). Cuanto más jugó un jugador respecto al total disponible, menos pesa este ajuste y más se acerca su Coeficiente MFL a su promedio real.' },
+            { num: '03', texto: 'Cada edición requiere un mínimo de 5 participantes para ser contabilizada de manera oficial y tiene un cupo máximo estricto de 10 jugadores. Si asisten 4 o menos no computa para las Tablas Generales. El sistema de inscripción se rige bajo la premisa de orden de llegada: los primeros 10 miembros del grupo en confirmar su asistencia aseguran su plaza. Todo jugador debe permanecer durante toda la jornada; en caso de retiro anticipado o llegada tardía que impida disputar los cruces, los partidos faltantes se computarán como derrotas automáticas por un resultado de 3-0. Asimismo, el participante que confirme su asistencia y no se presente a la jornada sufrirá una penalización directa de 3 puntos en la Tabla General por Puntaje de la temporada, afectando a su vez su promedio en la Tabla General por Coeficiente MFL.' },
+            { num: '04', texto: 'Los equipos disponibles en cada edición surgen de su temática, y se asignan a los jugadores mediante un sistema de doble transparencia. En primer lugar, se utiliza una ruleta con los nombres de los jugadores presentes para determinar el orden de elección. Siguiendo ese orden, cada participante gira una segunda ruleta con los equipos previamente seleccionados para obtener el suyo. Una vez asignado el equipo no se permiten cambios bajo ninguna circunstancia para garantizar la equidad de la competencia.' },
+            { num: '05', texto: 'Los encuentros otorgan 3 puntos por victoria, 1 por empate y 0 por derrota, definiéndose la localía mediante piedra, papel o tijera antes de empezar. En caso de repetir cruce, se juega obligatoriamente un partido de local y otro de visitante. El formato de la competencia y la duración de los tiempos se autocalibran según la asistencia para asegurar que la jornada presencial no supere las 3 horas totales, distribuyéndose de la siguiente manera:',
+              lista: [
+                'Con 5 jugadores se disputan 15 partidos totales (6 por jugador) a 5 minutos por tiempo.',
+                'Con 6 jugadores se juega una liga única de todos contra todos a una sola vuelta, sumando 15 partidos a 4 minutos por tiempo.',
+                'Con 7 jugadores se asignan 14 partidos totales (4 por jugador) a 5 minutos por tiempo.',
+                'Con 8 jugadores se generan 16 partidos totales (4 por jugador) a 4 minutos por tiempo.',
+                'Con 9 jugadores se disputan 18 partidos totales (4 por jugador) a 3 minutos por tiempo.',
+                'Con 10 jugadores se desarrollan 15 partidos totales (3 por jugador) a 4 minutos por tiempo.'
+              ] },
+            { num: '06', texto: 'Si dos o más participantes igualan en puntos al finalizar una edición, las posiciones se definen estrictamente bajo el orden de diferencia de goles, goles a favor y goles en contra. De persistir la igualdad, se consideran las tarjetas rojas, tarjetas amarillas y las faltas cometidas en esa edición. En el caso extremo de un empate absoluto en todas las estadísticas, se disputará un partido de desempate con prórroga y tanda de penales si fuera necesario.' },
+            { num: '07', texto: 'Todos los jugadores deben mantener un comportamiento respetuoso y deportivo. Cualquier actitud antideportiva será evaluada por la organización y podrá ser sancionada con advertencias, quita de puntos, descalificación de la fecha o la expulsión directa del torneo. Las partidas se disputan bajo los parámetros predeterminados del juego sin ayudas externas de ningún tipo. Ante cualquier falla técnica irreversible o desconexión ajena a los jugadores durante un partido, ese partido se reiniciará desde cero.' }
+        ];
+
+        function renderRegla(num) {
+            const regla = REGLAS.find(r => r.num === num);
+            let html = `<p class="regla-bloque">${regla.texto}</p>`;
+            if (regla.lista) {
+                html += `<ul class="lista-mfl">${regla.lista.map(t => `<li data-pos="•">${t}</li>`).join('')}</ul>`;
+            }
+            return html;
+        }
+
+        /* ============================================================
+           PREMIOS — datos + render
+           ============================================================ */
+        const PREMIOS = {
+            cristiano: {
+                nombre: 'El Bicho',
+                descripcion: 'Este premio rinde homenaje a Cristiano Ronaldo, reconocido como el máximo goleador de la historia del fútbol profesional. Se otorga al jugador o jugadores que hayan anotado la mayor cantidad de goles en la edición, en reconocimiento a su capacidad goleadora, eficacia ofensiva y liderazgo dentro del campo de juego. Se entrega desde la edición 24x05.',
+                ganadores: [
+                    ['Renzo Gallegos', '24x05 • 24x06 • 25x03 • 26x01'],
+                    ['Elías Parra', '24x05 • 24x06 • 25x06'],
+                    ['Santiago Pereyra', '24x05 • 25x01'],
+                    ['Emanuel Marqués', '25x05'],
+                    ['Gonzalo Silva', '25x04'],
+                    ['Agustín Marqués', '25x02'],
+                    ['Fidel Parra', '24x08'],
+                    ['Marcelo Silva', '24x07']
+                ]
+            },
+            maldini: {
+                nombre: 'La Muralla',
+                descripcion: 'Este premio rinde homenaje a Paolo Maldini, considerado uno de los mejores defensores de la historia del fútbol. Se otorga al jugador o jugadores con menor cantidad de goles recibidos en la edición, en reconocimiento a su solidez defensiva, disciplina táctica y capacidad para proteger a su equipo. Se entrega desde la edición 24x05.',
+                ganadores: [
+                    ['Elías Parra', '24x05 • 24x07 • 25x04 • 25x06 • 26x01'],
+                    ['Marcelo Silva', '24x05 • 24x08 • 25x07'],
+                    ['Santiago Pereyra', '25x01 • 25x04'],
+                    ['Emanuel Marqués', '25x05'],
+                    ['Franco Aguirre', '25x03'],
+                    ['Agustín Marqués', '25x02'],
+                    ['Fidel Parra', '24x07'],
+                    ['Renzo Gallegos', '24x06']
+                ]
+            },
+            ronaldinho: {
+                nombre: 'El Mago',
+                descripcion: 'Este premio rinde homenaje a Ronaldinho, reconocido como uno de los futbolistas más creativos, talentosos y espectaculares de todos los tiempos. Se otorga al jugador que haya anotado el gol más destacado de la edición, ya sea por su belleza, dificultad técnica o importancia en el desarrollo del torneo. Se entrega desde la edición 24x06.',
+                ganadores: [
+                    ['Gonzalo Silva', '25x04 • 26x01'],
+                    ['Agustín Marqués', '25x02 • 25x06'],
+                    ['Fidel Parra', '24x07 • 25x03'],
+                    ['Renzo Gallegos', '24x06 • 25x01'],
+                    ['Benjamín Márquez', '25x05'],
+                    ['Emanuel Martínez', '24x08']
+                ]
+            },
+            cruyff: {
+                nombre: 'La Furia',
+                descripcion: 'Este premio rinde homenaje a Johan Cruyff, máximo exponente del fútbol total y ampliamente reconocido como uno de los futbolistas más completos de la historia. Se otorga una sola vez por temporada al primer jugador que, además de destacarse tanto en ataque como en defensa, haya sumado también El Bicho, La Muralla y El Mago en esa misma temporada.',
+                ganadores: [
+                    ['Agustín Marqués', 'Temporada 2025'],
+                    ['Renzo Gallegos', 'Temporada 2024']
+                ]
+            }
+        };
+
+        function renderPremio(id) {
+            const p = PREMIOS[id];
+            const filas = p.ganadores.map(([nombre, detalle], i) => `<li data-pos="${i + 1}.">${nombre} (${detalle})</li>`).join('');
+            return `<p class="regla-bloque">${p.descripcion}</p><ul class="lista-mfl">${filas}</ul>`;
+        }
+
+        /* ============================================================
+           CONTROL DESLIZANTE GENÉRICO (botones + indicador + uno o más paneles flotantes)
+           ============================================================ */
+        function crearSelectorDeslizante({ contenedorId, indicadorId, paneles, opciones, inicial }) {
+            const cont = document.getElementById(contenedorId);
+            cont.innerHTML = `<span class="indicador-slider" id="${indicadorId}"></span>` + opciones
+                .map(o => `<button class="btn-slider" data-valor="${o.valor}">${o.etiqueta}</button>`)
+                .join('');
+
+            function mover(boton) {
+                const indicador = document.getElementById(indicadorId);
+                indicador.style.width = boton.offsetWidth + 'px';
+                indicador.style.transform = `translateX(${boton.offsetLeft}px)`;
+            }
+
+            function seleccionar(valor) {
+                let botonActivo = null;
+                cont.querySelectorAll('.btn-slider').forEach(b => {
+                    const esActivo = b.dataset.valor === String(valor);
+                    b.classList.toggle('activo', esActivo);
+                    if (esActivo) botonActivo = b;
+                });
+                if (botonActivo) mover(botonActivo);
+
+                paneles.forEach(p => {
+                    const panel = document.getElementById(p.id);
+                    panel.classList.remove('entrar');
+                    panel.innerHTML = p.render(valor);
+                    void panel.offsetWidth;
+                    panel.classList.add('entrar');
+                });
+            }
+
+            cont.querySelectorAll('.btn-slider').forEach(b => {
+                b.addEventListener('click', () => seleccionar(b.dataset.valor));
+            });
+            window.addEventListener('resize', () => {
+                const activo = cont.querySelector('.btn-slider.activo');
+                if (activo) mover(activo);
+            });
+
+            seleccionar(inicial);
+        }
+
+        function inicializarSliders() {
+            const anios = Object.keys(DATOS).sort((a, b) => a - b);
+            crearSelectorDeslizante({
+                contenedorId: 'selectorAnios', indicadorId: 'indicadorAnio',
+                paneles: [{ id: 'panelAnio', render: renderTemporadaHTML }],
+                opciones: anios.map(a => ({ valor: a, etiqueta: a })),
+                inicial: anios[anios.length - 1]
+            });
+
+            crearSelectorDeslizante({
+                contenedorId: 'selectorReglas', indicadorId: 'indicadorRegla',
+                paneles: [{ id: 'panelRegla', render: renderRegla }],
+                opciones: REGLAS.map(r => ({ valor: r.num, etiqueta: r.num })),
+                inicial: REGLAS[0].num
+            });
+
+            crearSelectorDeslizante({
+                contenedorId: 'selectorPremios', indicadorId: 'indicadorPremio',
+                paneles: [{ id: 'panelPremio', render: renderPremio }],
+                opciones: Object.entries(PREMIOS).map(([id, p]) => ({ valor: id, etiqueta: p.nombre })),
+                inicial: 'cristiano'
+            });
+
+            crearSelectorDeslizante({
+                contenedorId: 'selectorHistorico', indicadorId: 'indicadorHistorico',
+                paneles: [{ id: 'panelHistorico', render: renderHistoricoTabla }],
+                opciones: [{ valor: 'puntaje', etiqueta: 'PTS' }, { valor: 'mfl', etiqueta: 'MFL' }],
+                inicial: 'puntaje'
+            });
+        }
+
+        /* ============================================================
+           NAVEGACIÓN (tabs + routing por URL)
+           ============================================================ */
+        const SECCIONES = ['inicio', 'reglamento', 'eventos', 'premios', 'temporadas', 'historico'];
         const menuBtn = document.getElementById('menuBtn');
         const menuNav = document.getElementById('menuNav');
 
         function toggleMenu() {
             const active = menuNav.classList.toggle('active');
             menuBtn.textContent = active ? 'Cerrar' : 'Menú';
+            menuBtn.setAttribute('aria-expanded', active);
             document.body.style.overflow = active ? 'hidden' : 'auto';
         }
 
-        function navegar(idSeccion) {
-            if(menuNav.classList.contains('active')) {
-                toggleMenu();
-            }
-            
-            document.querySelectorAll('.seccion').forEach(sec => {
-                sec.classList.remove('active');
+        function resincronizarIndicadores(seccionEl) {
+            seccionEl.querySelectorAll('.selector-slider').forEach(cont => {
+                const activo = cont.querySelector('.btn-slider.activo');
+                const indicador = cont.querySelector('.indicador-slider');
+                if (activo && indicador) {
+                    indicador.style.width = activo.offsetWidth + 'px';
+                    indicador.style.transform = `translateX(${activo.offsetLeft}px)`;
+                }
             });
-            
-            const seccionDestino = document.getElementById(idSeccion);
-            if(seccionDestino) {
-                seccionDestino.classList.add('active');
+        }
+
+        function navegar(idSeccion, actualizarHash = true) {
+            if (!SECCIONES.includes(idSeccion)) idSeccion = 'inicio';
+            if (menuNav.classList.contains('active')) toggleMenu();
+
+            document.querySelectorAll('.seccion').forEach(sec => sec.classList.remove('active'));
+            const destino = document.getElementById(idSeccion);
+            if (destino) {
+                destino.classList.add('active');
+                resincronizarIndicadores(destino);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
+
+            document.querySelectorAll('.menu-desplegable a[data-seccion]').forEach(a => {
+                a.classList.toggle('activo', a.dataset.seccion === idSeccion);
+            });
+
+            if (actualizarHash && location.hash.slice(1) !== idSeccion) {
+                try {
+                    history.pushState(null, '', '#' + idSeccion);
+                } catch (e) {
+                    // Algunos entornos (iframes sandboxeados, previsualizaciones) no permiten
+                    // pushState por política de origen. La navegación por tabs sigue funcionando igual.
+                }
+            }
         }
+
+        window.addEventListener('popstate', () => {
+            navegar(location.hash.slice(1) || 'inicio', false);
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            inicializarSliders();
+            navegar(location.hash.slice(1) || 'inicio', false);
+        });
     </script>
 </body>
 </html>
