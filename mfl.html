@@ -498,14 +498,13 @@
         }
 
         function liPuntaje([nombre, pts], i) {
-            return `<li data-pos="${i + 1}.">${nombre} – ${pts} ${pts === 1 ? 'punto' : 'puntos'}</li>`;
+            return `<li data-pos="${i + 1}.">${nombre} (${pts} ${pts === 1 ? 'pt.' : 'pts.'})</li>`;
         }
 
         function liPromedio([nombre, ediciones, pts, promedio], i) {
             const texto = formatearPromedio(promedio);
             const esUnPunto = parseFloat(texto.replace(',', '.')) === 1;
-            const palabraEdicion = ediciones === 1 ? 'edición' : 'ediciones';
-            return `<li data-pos="${i + 1}.">${nombre} – ${ediciones} ${palabraEdicion} – ${texto} ${esUnPunto ? 'punto' : 'puntos'}</li>`;
+            return `<li data-pos="${i + 1}.">${nombre} (${ediciones} ed. • ${texto} ${esUnPunto ? 'pt.' : 'pts.'})</li>`;
         }
 
         function renderEdicionesHTML(anio) {
