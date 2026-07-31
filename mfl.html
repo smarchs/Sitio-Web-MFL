@@ -56,7 +56,7 @@
             }
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
         body {
             font-family: var(--fuente); background-color: var(--bg-base); background-image: var(--bg-gradiente);
@@ -793,8 +793,12 @@
             document.getElementById('listaCampeones').innerHTML = html;
 
             document.querySelectorAll('#listaCampeones .fila-campeon').forEach(fila => {
+                fila.open = false; // por si el navegador restaura un estado previo (pasa en Safari/iOS)
+                let porInteraccion = false;
+                fila.querySelector('summary').addEventListener('pointerdown', () => { porInteraccion = true; });
                 fila.addEventListener('toggle', () => {
-                    if (!fila.open) return;
+                    if (!fila.open || !porInteraccion) { porInteraccion = false; return; }
+                    porInteraccion = false;
                     const estrellas = fila.querySelector('.campeon-estrellas');
                     estrellas.classList.remove('rebote');
                     void estrellas.offsetWidth;
