@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M.A.F.I.A. League ™</title>
+    <meta name="description" content="Plataforma oficial de la MFL™: resultados, rankings, premios y reglamento del torneo de fútbol virtual entre amigos.">
+    <meta property="og:title" content="M.A.F.I.A. League™">
+    <meta property="og:description" content="Resultados, rankings, premios y reglamento del torneo de fútbol virtual entre amigos.">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="M.A.F.I.A. League™">
+    <meta name="twitter:description" content="Resultados, rankings, premios y reglamento del torneo de fútbol virtual entre amigos.">
+    <style>
+        :root {
+            color-scheme: light dark;
+            --bg-base: #ffffff;
+            --bg-gradiente: radial-gradient(circle at 50% -20%, #ffffff 0%, #f5f5f7 65%, #e8e8ed 100%);
+            --bg-header: rgba(255, 255, 255, 0.8);
+            --borde: rgba(0, 0, 0, 0.08);
+            --color-texto: #1d1d1f;
+            --color-secundario: #6e6e73;
+            --fuente: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+            --ancho-bloque: 90%;
+            --curva-apple: cubic-bezier(0.25, 1, 0.5, 1);
+            --color-oro: #d4af37;
+
+            /* DURACIONES UNIFICADAS: 3 escalones para todo el sitio, misma curva siempre */
+            --dur-hover: 0.25s;   /* micro-interacciones: color, opacity, nudge chico */
+            --dur-base: 0.4s;     /* transición de un componente: indicador, panel, detalle */
+            --dur-entrada: 0.6s;  /* revelaciones grandes: sección activa, menú fullscreen */
+
+            /* SOMBRAS (se ajustan en modo oscuro más abajo) */
+            --sombra-panel: 0 20px 60px rgba(0, 0, 0, 0.05);
+            --sombra-media: 0 4px 30px rgba(0, 0, 0, 0.03);
+            --sombra-media-hover: 0 14px 45px rgba(0, 0, 0, 0.08);
+            
+            /* ESCALA TIPOGRÁFICA UNIFICADA */
+            --fuente-cuerpo: clamp(18px, 2.5vw, 24px);
+            --fuente-subtitulo: clamp(22px, 3vw, 28px);
+            --fuente-titulo-seccion: clamp(26px, 3.8vw, 36px);
+            --fuente-h1: clamp(44px, 9vw, 92px);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-base: #000000;
+                --bg-gradiente: radial-gradient(circle at 50% -20%, #1c1c1e 0%, #070708 55%, #000000 100%);
+                --bg-header: rgba(0, 0, 0, 0.8);
+                --borde: rgba(255, 255, 255, 0.08);
+                --color-texto: #f5f5f7;
+                --color-secundario: #98989d;
+                --sombra-panel: 0 20px 60px rgba(0, 0, 0, 0.4);
+                --sombra-media: 0 4px 30px rgba(0, 0, 0, 0.3);
+                --sombra-media-hover: 0 14px 50px rgba(0, 0, 0, 0.55);
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: var(--fuente); background-color: var(--bg-base); background-image: var(--bg-gradiente);
+            background-attachment: fixed; color: var(--color-texto); letter-spacing: -0.025em;
+            -webkit-font-smoothing: antialiased; min-height: 100vh; display: flex; flex-direction: column;
+        }
+
+        /* HEADER */
+        header {
+            position: fixed; top: 0; left: 0; width: 100%; height: 52px;
+            padding: 0 calc((100% - var(--ancho-bloque)) / 2);
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 5000; background: var(--bg-header); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--borde);
+        }
+
+        .logo { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; text-decoration: none; color: var(--color-texto); transition: opacity var(--dur-hover) var(--curva-apple); }
+        .logo:hover, .logo:focus-visible { opacity: 0.6; }
+        .menu-toggle { background: none; border: none; color: var(--color-texto); font-family: var(--fuente); font-size: 15px; font-weight: 600; letter-spacing: -0.01em; cursor: pointer; opacity: 1; transition: opacity var(--dur-hover) var(--curva-apple); }
+        .menu-toggle:hover, .menu-toggle:focus-visible { opacity: 0.6; }
+
+        a:focus-visible, button:focus-visible, summary:focus-visible {
+            outline: 2px solid var(--color-secundario); outline-offset: 5px; border-radius: 3px;
+        }
+
+        /* MENÚ DESPLEGABLE */
+        .menu-desplegable {
+            position: fixed; top: 52px; left: 0; width: 100%; height: calc(100vh - 52px);
+            background: inherit; z-index: 4000; display: flex; align-items: center;
+            padding: 0 calc((100% - var(--ancho-bloque)) / 2);
+            opacity: 0; pointer-events: none; transform: scale(1.02) translateY(-10px);
+            transition: opacity var(--dur-entrada) var(--curva-apple), transform var(--dur-entrada) var(--curva-apple);
+        }
+        .menu-desplegable.active { opacity: 1; pointer-events: auto; transform: scale(1) translateY(0); }
+        .menu-desplegable ul { list-style: none; width: 100%; }
+        .menu-desplegable ul li { margin-bottom: 3.5vh; opacity: 0; transform: translateY(16px); transition: var(--dur-entrada) var(--curva-apple); }
+        .menu-desplegable.active ul li { opacity: 1; transform: translateY(0); }
+        .menu-desplegable ul li a { font-size: clamp(32px, 6.5vw, 60px); font-weight: 700; color: var(--color-texto); text-decoration: none; opacity: 0.35; display: inline-flex; align-items: center; transition: opacity var(--dur-hover) var(--curva-apple), transform var(--dur-hover) var(--curva-apple); }
+        .menu-desplegable ul li a:hover, .menu-desplegable ul li a:focus-visible { opacity: 1; transform: translateX(4px); }
+        .menu-desplegable ul li a.activo { opacity: 1; }
+        .menu-desplegable ul li a.activo::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--color-texto); margin-left: 16px; transform: translateY(0.08em); }
+
+        /* CONTROL DESLIZANTE REUTILIZABLE (Temporadas, Reglamento, Premios) */
+        .selector-slider {
+            position: relative; display: flex; gap: 4px; margin-bottom: 40px; padding: 4px;
+            border: 1px solid var(--borde); border-radius: 100px; width: fit-content; max-width: 100%;
+            overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--borde) transparent;
+        }
+        .selector-slider::-webkit-scrollbar { height: 3px; }
+        .selector-slider::-webkit-scrollbar-track { background: transparent; }
+        .selector-slider::-webkit-scrollbar-thumb { background: var(--borde); border-radius: 100px; }
+        .indicador-slider { position: absolute; top: 4px; bottom: 4px; left: 0; border-radius: 100px; background: var(--color-texto); transition: transform var(--dur-base) var(--curva-apple), width var(--dur-base) var(--curva-apple); z-index: 0; }
+        .btn-slider {
+            position: relative; z-index: 1; font-family: var(--fuente); font-size: 15px; font-weight: 600; letter-spacing: -0.01em;
+            padding: 9px 20px; border-radius: 100px; border: none; background: transparent;
+            color: var(--color-secundario); cursor: pointer; white-space: nowrap;
+            transition: color var(--dur-base) var(--curva-apple);
+        }
+        .btn-slider:hover { color: var(--color-texto); }
+        .btn-slider.activo { color: var(--bg-base); }
+        .panel-flotante {
+            border: 1px solid var(--borde); border-radius: 16px; padding: 30px clamp(20px, 4vw, 40px);
+            background: var(--bg-header); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            box-shadow: var(--sombra-panel); margin-bottom: 40px;
+        }
+        .panel-flotante.entrar { animation: appleFadeIn var(--dur-base) var(--curva-apple) both; }
+        .panel-flotante > *:first-child { margin-top: 0; }
+        .panel-flotante > *:last-child { margin-bottom: 0; }
+
+        /* CIRCULITOS DE EDICIÓN / TIPO DE TABLA (Temporadas: ediciones y PTS-MFL) */
+        .selector-ediciones { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+        .btn-edicion {
+            min-width: 36px; height: 36px; padding: 0 10px; flex-shrink: 0; border-radius: 100px; border: 1px solid var(--borde);
+            background: transparent; color: var(--color-secundario); font-family: var(--fuente);
+            font-size: 13px; font-weight: 600; letter-spacing: -0.01em; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: color var(--dur-hover) var(--curva-apple), background-color var(--dur-hover) var(--curva-apple), border-color var(--dur-hover) var(--curva-apple);
+        }
+        .btn-edicion:hover { color: var(--color-texto); }
+        .btn-edicion.activo { background-color: var(--color-texto); border-color: var(--color-texto); color: var(--bg-base); }
+        /* Salida en cascada de las filas (inversa a la entrada: se retira primero
+           la última fila, contando con nth-last-child en vez de nth-child).
+           Selectores con el mismo prefijo que la entrada para tener más
+           especificidad y ganarle el empate sin depender del orden en el archivo. */
+        .desplegable-contenido .lista-mfl li.saliendo-cascada, .panel-flotante .lista-mfl li.saliendo-cascada { animation: itemFadeOut var(--dur-base) var(--curva-apple) both; }
+        .desplegable-contenido .lista-mfl li.saliendo-cascada:nth-last-child(1), .panel-flotante .lista-mfl li.saliendo-cascada:nth-last-child(1) { animation-delay: .04s; }
+        .desplegable-contenido .lista-mfl li.saliendo-cascada:nth-last-child(2), .panel-flotante .lista-mfl li.saliendo-cascada:nth-last-child(2) { animation-delay: .07s; }
+        .desplegable-contenido .lista-mfl li.saliendo-cascada:nth-last-child(3), .panel-flotante .lista-mfl li.saliendo-cascada:nth-last-child(3) { animation-delay: .1s; }
+        .desplegable-contenido .lista-mfl li.saliendo-cascada:nth-last-child(4), .panel-flotante .lista-mfl li.saliendo-cascada:nth-last-child(4) { animation-delay: .13s; }
+        .desplegable-contenido .lista-mfl li.saliendo-cascada:nth-last-child(5), .panel-flotante .lista-mfl li.saliendo-cascada:nth-last-child(5) { animation-delay: .16s; }
+        .desplegable-contenido .lista-mfl li.saliendo-cascada:nth-last-child(6), .panel-flotante .lista-mfl li.saliendo-cascada:nth-last-child(6) { animation-delay: .19s; }
+        .desplegable-contenido .lista-mfl li.saliendo-cascada:nth-last-child(7), .panel-flotante .lista-mfl li.saliendo-cascada:nth-last-child(7) { animation-delay: .22s; }
+        .desplegable-contenido .lista-mfl li.saliendo-cascada:nth-last-child(8), .panel-flotante .lista-mfl li.saliendo-cascada:nth-last-child(8) { animation-delay: .25s; }
+        .desplegable-contenido .lista-mfl li.saliendo-cascada:nth-last-child(9), .panel-flotante .lista-mfl li.saliendo-cascada:nth-last-child(9) { animation-delay: .28s; }
+        .desplegable-contenido .lista-mfl li.saliendo-cascada:nth-last-child(10), .panel-flotante .lista-mfl li.saliendo-cascada:nth-last-child(10) { animation-delay: .31s; }
+        .desplegable-contenido .lista-mfl li.saliendo-cascada:nth-last-child(n+11), .panel-flotante .lista-mfl li.saliendo-cascada:nth-last-child(n+11) { animation-delay: .34s; }
+        @keyframes itemFadeOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(-6px); } }
+
+        /* CAMPEONES */
+        .lista-campeones { display: flex; flex-direction: column; gap: 36px; }
+        .fila-campeon { margin: 0; }
+        .fila-campeon summary {
+            text-transform: none; letter-spacing: -0.01em; font-size: var(--fuente-cuerpo);
+            font-weight: 600; color: var(--color-secundario); justify-content: space-between;
+            align-items: center; flex-wrap: wrap; row-gap: 8px; padding: 0;
+            transition: color var(--dur-hover) var(--curva-apple);
+        }
+        .fila-campeon summary::after { content: none; }
+        .fila-campeon summary:hover, .fila-campeon summary:focus-visible, .fila-campeon[open] summary { color: var(--color-texto); transform: none; }
+        .campeon-titulo { display: flex; align-items: baseline; }
+        .campeon-pos { color: var(--color-texto); font-weight: 400; min-width: 2.5ch; margin-right: 12px; text-align: right; flex-shrink: 0; }
+        .campeon-estrellas {
+            color: var(--color-oro); letter-spacing: 0.08em; font-size: clamp(28px, 6vw, 52px); line-height: 1;
+        }
+        .campeon-estrellas .estrella {
+            display: inline-block; text-shadow: none;
+        }
+        .campeon-estrellas.rebote .estrella { animation: estrellaRebote 0.5s var(--curva-apple); }
+        /* Este desfasaje (0s, .5s, 1s...) tiene que coincidir con ESPACIADO_REBOTE_MS del JS */
+        .campeon-estrellas .estrella:nth-child(1) { animation-delay: 0s; }
+        .campeon-estrellas .estrella:nth-child(2) { animation-delay: .5s; }
+        .campeon-estrellas .estrella:nth-child(3) { animation-delay: 1s; }
+        .campeon-estrellas .estrella:nth-child(4) { animation-delay: 1.5s; }
+        .campeon-estrellas .estrella:nth-child(5) { animation-delay: 2s; }
+        .campeon-estrellas .estrella:nth-child(n+6) { animation-delay: 2.5s; }
+        @keyframes estrellaRebote {
+            0% { transform: scale(1); text-shadow: none; }
+            35% { transform: scale(1.3); text-shadow: 0 0 16px rgba(212, 175, 55, 0.5); }
+            60% { transform: scale(0.92); text-shadow: 0 0 10px rgba(212, 175, 55, 0.35); }
+            100% { transform: scale(1); text-shadow: none; }
+        }
+        .fila-campeon .desplegable-contenido .lista-mfl { margin-bottom: 0; margin-left: calc(2.5ch + 12px); }
+
+        /* SISTEMA DE SECCIONES (TABS) */
+        .seccion { display: none; width: var(--ancho-bloque); margin: 0 auto; padding-top: 18vh; flex-grow: 1; }
+        .seccion.active { display: flex; flex-direction: column; justify-content: flex-start; }
+
+        /* Revelación escalonada: cada hijo directo de la sección activa entra con un leve retraso */
+        .seccion.active > * { animation: appleFadeIn var(--dur-entrada) var(--curva-apple) both; }
+        .seccion.active > *:nth-child(1) { animation-delay: 0s; }
+        .seccion.active > *:nth-child(2) { animation-delay: .05s; }
+        .seccion.active > *:nth-child(3) { animation-delay: .1s; }
+        .seccion.active > *:nth-child(4) { animation-delay: .15s; }
+        .seccion.active > *:nth-child(5) { animation-delay: .2s; }
+        .seccion.active > *:nth-child(6) { animation-delay: .25s; }
+        .seccion.active > *:nth-child(7) { animation-delay: .3s; }
+        .seccion.active > *:nth-child(8) { animation-delay: .35s; }
+        .seccion.active > *:nth-child(9) { animation-delay: .4s; }
+        .seccion.active > *:nth-child(n+10) { animation-delay: .45s; }
+        @keyframes appleFadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Revelación escalonada de las filas dentro de un desplegable, al abrirlo */
+        .desplegable-contenido .lista-mfl li, .panel-flotante .lista-mfl li, .lista-campeones .fila-campeon { animation: itemFadeIn var(--dur-base) var(--curva-apple) both; }
+        .desplegable-contenido .lista-mfl li:nth-child(1), .panel-flotante .lista-mfl li:nth-child(1), .lista-campeones .fila-campeon:nth-child(1) { animation-delay: .04s; }
+        .desplegable-contenido .lista-mfl li:nth-child(2), .panel-flotante .lista-mfl li:nth-child(2), .lista-campeones .fila-campeon:nth-child(2) { animation-delay: .07s; }
+        .desplegable-contenido .lista-mfl li:nth-child(3), .panel-flotante .lista-mfl li:nth-child(3), .lista-campeones .fila-campeon:nth-child(3) { animation-delay: .1s; }
+        .desplegable-contenido .lista-mfl li:nth-child(4), .panel-flotante .lista-mfl li:nth-child(4), .lista-campeones .fila-campeon:nth-child(4) { animation-delay: .13s; }
+        .desplegable-contenido .lista-mfl li:nth-child(5), .panel-flotante .lista-mfl li:nth-child(5), .lista-campeones .fila-campeon:nth-child(5) { animation-delay: .16s; }
+        .desplegable-contenido .lista-mfl li:nth-child(6), .panel-flotante .lista-mfl li:nth-child(6), .lista-campeones .fila-campeon:nth-child(6) { animation-delay: .19s; }
+        .desplegable-contenido .lista-mfl li:nth-child(7), .panel-flotante .lista-mfl li:nth-child(7), .lista-campeones .fila-campeon:nth-child(7) { animation-delay: .22s; }
+        .desplegable-contenido .lista-mfl li:nth-child(8), .panel-flotante .lista-mfl li:nth-child(8), .lista-campeones .fila-campeon:nth-child(8) { animation-delay: .25s; }
+        .desplegable-contenido .lista-mfl li:nth-child(9), .panel-flotante .lista-mfl li:nth-child(9), .lista-campeones .fila-campeon:nth-child(9) { animation-delay: .28s; }
+        .desplegable-contenido .lista-mfl li:nth-child(10), .panel-flotante .lista-mfl li:nth-child(10), .lista-campeones .fila-campeon:nth-child(10) { animation-delay: .31s; }
+        .desplegable-contenido .lista-mfl li:nth-child(n+11), .panel-flotante .lista-mfl li:nth-child(n+11), .lista-campeones .fila-campeon:nth-child(n+11) { animation-delay: .34s; }
+        @keyframes itemFadeIn { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* JERARQUÍA TIPOGRÁFICA */
+        h1 { font-size: var(--fuente-h1); font-weight: 800; letter-spacing: -0.05em; line-height: 1.05; border-bottom: 1px solid var(--borde); padding-bottom: 40px; margin-bottom: 40px; }
+        h1 span { font-size: 0.38em; vertical-align: super; font-weight: 600; }
+        
+        h2 { font-size: var(--fuente-titulo-seccion); font-weight: 700; color: var(--color-texto); letter-spacing: -0.03em; margin: 35px 0 15px 0; }
+        .desplegable-contenido h2 { font-size: var(--fuente-subtitulo); margin: 25px 0 10px 0; }
+        
+        .desplegable-contenido > h2:first-of-type { margin-top: 5px; }
+        
+        .regla-bloque { font-size: var(--fuente-cuerpo); line-height: 1.55; color: var(--color-secundario); font-weight: 500; letter-spacing: -0.02em; margin-bottom: 25px; max-width: 95%; text-align: justify; }
+        .manifiesto-portada { font-size: clamp(24px, 3.8vw, 40px); line-height: 1.38; color: var(--color-secundario); font-weight: 500; letter-spacing: -0.035em; margin-bottom: 40px; }
+
+        /* CONTENEDOR MULTIMEDIA CON ALINEACIÓN IZQUIERDA RÍGIDA */
+        .video-contenedor {
+            width: 100%;
+            max-width: 1120px;
+            margin: 0 0 40px 0;
+            aspect-ratio: 16 / 9;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--sombra-media);
+            border: 1px solid var(--borde);
+            background-color: rgba(0, 0, 0, 0.05);
+            transition: box-shadow var(--dur-base) var(--curva-apple), transform var(--dur-base) var(--curva-apple);
+        }
+        .video-contenedor:hover { box-shadow: var(--sombra-media-hover); transform: translateY(-3px); }
+        .video-contenedor iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        /* INTERFAZ DESPLEGABLE NATIVA */
+        details { margin: 5px 0; width: 100%; }
+        summary, .etiqueta-grupo {
+            font-size: var(--fuente-cuerpo); font-weight: 600; color: var(--color-secundario);
+            text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        summary {
+            padding: 12px 0; cursor: pointer; list-style: none; display: flex; align-items: center;
+            outline: none; user-select: none;
+            transition: color var(--dur-hover) var(--curva-apple), transform var(--dur-hover) var(--curva-apple);
+        }
+        summary:hover, summary:focus-visible { color: var(--color-texto); transform: translateX(4px); }
+        summary::-webkit-details-marker { display: none; }
+        summary::after {
+            content: "→"; font-size: 0.8em; margin-left: 12px; color: var(--color-secundario); opacity: 0.5;
+            transition: transform var(--dur-base) var(--curva-apple), opacity var(--dur-hover) var(--curva-apple);
+        }
+        summary:hover::after { opacity: 1; }
+        details[open] summary::after { transform: rotate(90deg); }
+        .desplegable-contenido { padding-top: 10px; animation: desplegarFade var(--dur-base) var(--curva-apple) forwards; }
+
+        /* Etiqueta estática de grupo (Ediciones / Rankings en Temporadas): misma
+           tipografía que summary, pero sin flecha ni comportamiento clicable. */
+        .grupo-temporada + .grupo-temporada { margin-top: 20px; }
+        .etiqueta-grupo { margin: 0 0 10px 0; }
+        @keyframes desplegarFade { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* LISTAS MFL ALINEADAS POR CUADRÍCULA ELÁSTICA SIMÉTRICA */
+        .lista-mfl { list-style: none; margin: 0 0 30px 0; padding-left: 0; max-width: 95%; }
+        .lista-mfl li {
+            font-size: var(--fuente-cuerpo); line-height: 1.6; color: var(--color-secundario);
+            font-weight: 500; margin-bottom: 8px; display: flex; align-items: flex-start;
+            transition: color var(--dur-hover) var(--curva-apple), transform var(--dur-hover) var(--curva-apple);
+        }
+        .lista-mfl li:hover { color: var(--color-texto); transform: translateX(4px); }
+        .lista-mfl li:hover::before { color: var(--color-texto); }
+        #panelPremio .lista-mfl li:hover, #panelHistorico .lista-mfl li:hover { transform: none; }
+
+        /* Contenedor elástico normalizado para evitar descalibración */
+        .lista-mfl li::before {
+            content: attr(data-pos);
+            color: var(--color-texto);
+            font-weight: 400;
+            display: inline-block;
+            min-width: 2.5ch;
+            margin-right: 12px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+        
+        .lista-mfl li[data-pos="•"]::before {
+            font-weight: 700;
+            text-align: center;
+        }
+
+        /* Forzado de espacio rígido horizontal después de los dos puntos */
+        .lista-mfl li strong {
+            margin-right: 8px;
+            color: var(--color-texto);
+        }
+
+        footer { width: var(--ancho-bloque); margin: 0 auto; padding: 40px 0; font-size: 13px; font-weight: 500; color: var(--color-secundario); border-top: 1px solid var(--borde); margin-top: 50px; }
+
+        @media (max-width: 1024px) { .seccion { padding-top: 15vh; } }
+        @media (max-width: 768px) { .regla-bloque, .lista-mfl, h2, .desplegable-contenido h2 { max-width: 100%; } }
+        @media (max-width: 480px) { .seccion { padding-top: 12vh; } h1 { padding-bottom: 30px; margin-bottom: 30px; } .regla-bloque { margin-bottom: 25px; } }
+
+        /* En pantallas muy anchas, el 90% del viewport da líneas de texto demasiado
+           largas para leer cómodamente. A partir de 1556px (donde el 90% ya mide
+           1400px) se tope ese mismo ancho como valor fijo. Como header, menú y
+           footer se centran con esta misma variable, quedan alineados igual. */
+        @media (min-width: 1556px) {
+            :root { --ancho-bloque: 1400px; }
+        }
+
+        html { scroll-behavior: smooth; }
+
+        /* RULETAS DE SORTEO (Eventos) */
+        .bloque-ruleta { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 15px; }
+        .bloque-ruleta + .bloque-ruleta, .bloque-ruleta + #btnReiniciarSorteo { margin-top: 30px; }
+        .bloque-ruleta .lista-mfl { text-align: left; max-width: 280px; margin: 0 auto; }
+        #resultadosJugadores li::before, #resultadosEquipos li::before { content: none; margin-right: 0; min-width: 0; }
+        .ruleta-contenedor {
+            position: relative; width: 290px; height: 290px; max-width: 100%; flex-shrink: 0; cursor: pointer;
+            transition: transform var(--dur-hover) var(--curva-apple);
+        }
+        .ruleta-contenedor:hover { transform: scale(1.02); }
+        .ruleta-contenedor:active { transform: scale(0.98); }
+        .ruleta-contenedor.deshabilitada { cursor: default; pointer-events: none; opacity: 0.55; }
+        .ruleta-contenedor canvas { display: block; border-radius: 50%; box-shadow: var(--sombra-panel); }
+        .puntero-ruleta {
+            position: absolute; top: -4px; left: 50%; transform: translateX(-50%);
+            width: 0; height: 0; z-index: 2;
+            border-left: 10px solid transparent; border-right: 10px solid transparent;
+            border-top: 16px solid var(--color-texto);
+        }
+        .ruleta-contenedor.gano canvas { animation: pulsoGanador 0.6s var(--curva-apple); }
+        @keyframes pulsoGanador {
+            0% { box-shadow: var(--sombra-panel); }
+            35% { box-shadow: 0 0 0 10px rgba(180, 180, 186, 0.4), var(--sombra-panel); transform: scale(1.03); }
+            100% { box-shadow: var(--sombra-panel); }
+        }
+        #btnReiniciarSorteo { border: 1px solid var(--borde); }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important; animation-delay: 0s !important;
+                transition-duration: 0.01ms !important; scroll-behavior: auto !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="#inicio" class="logo" onclick="navegar('inicio'); return false;">MFL™</a>
+        <button class="menu-toggle" id="menuBtn" onclick="toggleMenu()" aria-expanded="false" aria-controls="menuNav">Menú</button>
+    </header>
+
+    <div class="menu-desplegable" id="menuNav">
+        <nav style="width: 100%;">
+            <ul>
+                <li style="--i:1"><a href="#inicio" data-seccion="inicio" onclick="navegar('inicio'); return false;">Inicio</a></li>
+                <li style="--i:2"><a href="#reglamento" data-seccion="reglamento" onclick="navegar('reglamento'); return false;">Reglamento</a></li>
+                <li style="--i:3"><a href="#eventos" data-seccion="eventos" onclick="navegar('eventos'); return false;">Eventos</a></li>
+                <li style="--i:4"><a href="#premios" data-seccion="premios" onclick="navegar('premios'); return false;">Premios</a></li>
+                <li style="--i:5"><a href="#temporadas" data-seccion="temporadas" onclick="navegar('temporadas'); return false;">Temporadas</a></li>
+                <li style="--i:6"><a href="#campeones" data-seccion="campeones" onclick="navegar('campeones'); return false;">Campeones</a></li>
+                <li style="--i:7"><a href="#historico" data-seccion="historico" onclick="navegar('historico'); return false;">Histórico</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- SECCIÓN: INICIO -->
+    <main id="inicio" class="seccion active">
+        <h1>M.A.F.I.A. League<span>™</span></h1>
+        <p class="manifiesto-portada">
+            Plataforma oficial de gestión, seguimiento y análisis para la MFL™, un torneo dinámico de fútbol virtual organizado por The Mostly Awesome Football International Association.
+        </p>
+        
+        <!-- REPRODUCTOR DE VIDEO ALINEADO A LA IZQUIERDA -->
+        <div class="video-contenedor">
+            <iframe src="https://www.youtube.com/embed/cEF8H5GfrMw" title="Video de presentación de la MFL League" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
+        </div>
+    </main>
+
+    <!-- SECCIÓN: REGLAMENTO -->
+    <main id="reglamento" class="seccion">
+        <h1>Reglamento MFL<span>™</span></h1>
+
+        <div class="selector-slider" id="selectorReglas"></div>
+        <div class="panel-flotante" id="panelRegla"></div>
+    </main>
+
+    <!-- SECCIÓN: PREMIOS -->
+    <main id="premios" class="seccion">
+        <h1>Premios MFL<span>™</span></h1>
+
+        <div class="selector-slider" id="selectorPremios"></div>
+        <div class="panel-flotante" id="panelPremio"></div>
+    </main>
+
+    <!-- SECCIÓN: TEMPORADAS -->
+    <main id="temporadas" class="seccion">
+        <h1>Temporadas MFL<span>™</span></h1>
+
+        <div class="selector-slider" id="selectorAnios"></div>
+        <div class="panel-flotante" id="panelAnio"></div>
+    </main>
+
+    <!-- SECCIÓN: EVENTOS -->
+    <main id="eventos" class="seccion">
+        <h1>Eventos MFL<span>™</span></h1>
+        <p class="manifiesto-portada">Próximamente.</p>
+    </main>
+
+    <!-- ============================================================
+         SISTEMA DE SORTEO EN VIVO + FIXTURE — GUARDADO PARA REUSAR
+         ============================================================
+         Esto es exactamente lo que se usó en la 26x02 (dos ruletas:
+         orden de jugadores J1-J5, y equipos) más el fixture con
+         data-local/data-visita que arma solo el texto final.
+         El <template> no se renderiza en pantalla, así que no aparece
+         en el sitio — solo queda guardado en el código.
+
+         PARA LA PRÓXIMA EDICIÓN (26x03):
+         1) Actualizar el array JUGADORES_26X02 más abajo en el <script>
+            (nombre y ID de la constante) con los jugadores confirmados.
+         2) Si cambia la cantidad de jugadores, regenerar el fixture
+            (cruces + orden) con las mismas reglas que ya charlamos:
+            local/visitante fijo en los que se repiten, "sortear
+            localía" solo en los que se enfrentan una vez, cruces al
+            azar, y que nadie juegue dos partidos seguidos.
+         3) Copiar el contenido de este <template> adentro de
+            <main id="eventos">, en vez del "Próximamente.".
+         4) Actualizar Fecha / Edición / Temática / Juego arriba del todo.
+         Todas las funciones JS (dibujarRuleta, girarRuletaJugadores,
+         etc.) y el CSS de las ruletas siguen intactos más abajo en el
+         archivo — no hace falta tocar nada de eso, solo el HTML.
+    -->
+    <template id="plantillaSorteoEnVivo">
+        <h2>Segunda Edición (26x02)</h2>
+        <p class="regla-bloque"><strong>Fecha:</strong> Domingo 16 de agosto</p>
+        <p class="regla-bloque"><strong>Temática:</strong> Copa del Mundo 2026</p>
+        <p class="regla-bloque"><strong>Juego:</strong> PES 2006</p>
+
+        <h2>Sorteo en Vivo</h2>
+        <p class="regla-bloque">Para usar justo antes de arrancar la jornada: primero se sortea el orden J1 a J5 entre los cinco jugadores presentes, y después, siguiendo ese mismo orden, cada uno gira la ruleta de selecciones para saber qué equipo le toca (regla 04). El fixture de abajo se completa solo con los resultados.</p>
+
+        <div class="panel-flotante">
+            <div class="bloque-ruleta">
+                <div class="ruleta-contenedor" id="contenedorRuletaJugadores" onclick="girarRuletaJugadores()">
+                    <div class="puntero-ruleta"></div>
+                    <canvas id="ruletaJugadores" width="290" height="290"></canvas>
+                </div>
+                <p class="etiqueta-grupo" id="tituloRuletaJugadores">Sorteando (J1)</p>
+                <ul class="lista-mfl" id="resultadosJugadores"></ul>
+            </div>
+
+            <div class="bloque-ruleta" id="bloqueRuletaEquipos" style="display:none;">
+                <div class="ruleta-contenedor" id="contenedorRuletaEquipos" onclick="girarRuletaEquipos()">
+                    <div class="puntero-ruleta"></div>
+                    <canvas id="ruletaEquipos" width="290" height="290"></canvas>
+                </div>
+                <p class="etiqueta-grupo" id="tituloRuletaEquipos">Equipo para J1</p>
+                <ul class="lista-mfl" id="resultadosEquipos"></ul>
+            </div>
+
+            <button class="btn-slider" id="btnReiniciarSorteo" onclick="reiniciarSorteo()" style="display:none;">Reiniciar sorteo</button>
+        </div>
+
+        <h2>Fixture de Partidos</h2>
+        <p class="regla-bloque linea-partido" data-local="5" data-visita="4"><strong>Partido 1:</strong> J5 vs J4</p>
+        <p class="regla-bloque linea-partido" data-local="3" data-visita="1"><strong>Partido 2:</strong> J3 vs J1</p>
+        <p class="regla-bloque linea-partido" data-local="4" data-visita="5"><strong>Partido 3:</strong> J4 vs J5</p>
+        <p class="regla-bloque linea-partido" data-local="1" data-visita="2"><strong>Partido 4:</strong> J1 vs J2</p>
+        <p class="regla-bloque linea-partido" data-local="3" data-visita="4" data-sortear="1"><strong>Partido 5:</strong> J3 vs J4 (sortear localía)</p>
+        <p class="regla-bloque linea-partido" data-local="1" data-visita="5" data-sortear="1"><strong>Partido 6:</strong> J1 vs J5 (sortear localía)</p>
+        <p class="regla-bloque linea-partido" data-local="4" data-visita="2"><strong>Partido 7:</strong> J4 vs J2</p>
+        <p class="regla-bloque linea-partido" data-local="3" data-visita="5"><strong>Partido 8:</strong> J3 vs J5</p>
+        <p class="regla-bloque linea-partido" data-local="2" data-visita="1"><strong>Partido 9:</strong> J2 vs J1</p>
+        <p class="regla-bloque linea-partido" data-local="5" data-visita="3"><strong>Partido 10:</strong> J5 vs J3</p>
+        <p class="regla-bloque linea-partido" data-local="2" data-visita="4"><strong>Partido 11:</strong> J2 vs J4</p>
+        <p class="regla-bloque linea-partido" data-local="1" data-visita="3"><strong>Partido 12:</strong> J1 vs J3</p>
+        <p class="regla-bloque linea-partido" data-local="2" data-visita="5" data-sortear="1"><strong>Partido 13:</strong> J2 vs J5 (sortear localía)</p>
+        <p class="regla-bloque linea-partido" data-local="1" data-visita="4" data-sortear="1"><strong>Partido 14:</strong> J1 vs J4 (sortear localía)</p>
+        <p class="regla-bloque linea-partido" data-local="2" data-visita="3" data-sortear="1"><strong>Partido 15:</strong> J2 vs J3 (sortear localía)</p>
+    </template>
+
+    <!-- SECCIÓN: CAMPEONES -->
+    <main id="campeones" class="seccion">
+        <h1>Campeones MFL<span>™</span></h1>
+        <div class="lista-campeones" id="listaCampeones"></div>
+    </main>
+
+    <!-- SECCIÓN: HISTÓRICO CONSOLIDADO -->
+    <main id="historico" class="seccion">
+        <h1>Histórico MFL<span>™</span></h1>
+
+        <div class="selector-slider" id="selectorHistorico"></div>
+        <div class="panel-flotante" id="panelHistorico"></div>
+    </main>
+
+    <footer>© 2026 • M.A.F.I.A. • smarchs STUDIOS</footer>
+
+    <script>
+        /* ============================================================
+           FUENTE ÚNICA DE DATOS
+           Para cargar una edición nueva: agregar su código dentro del
+           año correspondiente (o crear el año si es el primero) con el
+           título y los resultados ya ordenados [nombre, puntos].
+           Todo lo demás (tablas generales, promedios e histórico) se
+           recalcula solo. No tocar nada más.
+           ============================================================ */
+        const DATOS = {
+            2026: {
+                "26x01": { titulo: "Primera Edición", resultados: [
+                    ["Renzo Gallegos", 5], ["Elías Parra", 4], ["Marcelo Silva", 3], ["Gonzalo Silva", 2], ["Fidel Parra", 1]
+                ]},
+                "26x02": { titulo: "Segunda Edición", resultados: [
+                    ["Elías Parra", 5], ["Renzo Gallegos", 4], ["Fidel Parra", 3], ["Diego Aragón", 2], ["Marcelo Silva", 1]
+                ]}
+            },
+            2025: {
+                "25x01": { titulo: "Primera Edición", resultados: [
+                    ["Santiago Pereyra", 6], ["Marcelo Silva", 5], ["Renzo Gallegos", 4], ["Elías Parra", 3], ["Emanuel Martínez", 2], ["Máximo Bautista", 1]
+                ]},
+                "25x02": { titulo: "Segunda Edición", resultados: [
+                    ["Agustín Marqués", 12], ["Máximo Bautista", 11], ["Emanuel Marqués", 10], ["Gonzalo Silva", 9], ["Elías Parra", 8], ["Fidel Parra", 7], ["Marcelo Silva", 6], ["Emanuel Martínez", 5], ["Frank Rauchenberger", 4], ["Santiago Pereyra", 3], ["Renzo Gallegos", 2], ["Julián Benegas", 1]
+                ]},
+                "25x03": { titulo: "Tercera Edición", resultados: [
+                    ["Renzo Gallegos", 11], ["Agustín Marqués", 10], ["Emanuel Marqués", 9], ["Marcelo Silva", 8], ["Benjamín Márquez", 7], ["Franco Aguirre", 6], ["Santiago Pereyra", 5], ["Elías Parra", 4], ["Máximo Bautista", 3], ["Fidel Parra", 2], ["Mariano Miranda", 1]
+                ]},
+                "25x04": { titulo: "Cuarta Edición", resultados: [
+                    ["Gonzalo Silva", 8], ["Santiago Pereyra", 7], ["Marcelo Silva", 6], ["Elías Parra", 5], ["Emanuel Martínez", 4], ["Renzo Gallegos", 3], ["Fidel Parra", 2], ["Máximo Bautista", 1]
+                ]},
+                "25x05": { titulo: "Quinta Edición", resultados: [
+                    ["Emanuel Marqués", 8], ["Gonzalo Silva", 7], ["Agustín Marqués", 6], ["Benjamín Márquez", 5], ["Marcelo Silva", 4], ["Santiago Pereyra", 3], ["Renzo Gallegos", 2], ["Tobías Márquez", 1]
+                ]},
+                "25x06": { titulo: "Sexta Edición", resultados: [
+                    ["Elías Parra", 8], ["Marcelo Silva", 7], ["Gonzalo Silva", 6], ["Benjamín Márquez", 5], ["Agustín Marqués", 4], ["Emanuel Marqués", 3], ["Fidel Parra", 2], ["Máximo Bautista", 1]
+                ]},
+                "25x07": { titulo: "Séptima Edición", resultados: [
+                    ["Elías Parra", 5], ["Marcelo Silva", 4], ["Gonzalo Silva", 3], ["Santiago Pereyra", 2], ["Fidel Parra", 1]
+                ]}
+            },
+            2024: {
+                "24x01": { titulo: "Primera Edición", resultados: [
+                    ["Santiago Pereyra", 6], ["Marcelo Silva", 5], ["Gonzalo Silva", 4], ["Elías Parra", 3], ["Renzo Gallegos", 2], ["Emanuel Martínez", 1]
+                ]},
+                "24x02": { titulo: "Segunda Edición", resultados: [
+                    ["Marcelo Silva", 6], ["Gonzalo Silva", 5], ["Renzo Gallegos", 4], ["Elías Parra", 3], ["Emanuel Martínez", 2], ["Santiago Pereyra", 1]
+                ]},
+                "24x03": { titulo: "Tercera Edición", resultados: [
+                    ["Marcelo Silva", 5], ["Elías Parra", 4], ["Emanuel Martínez", 3], ["Gonzalo Silva", 2], ["Fidel Parra", 1]
+                ]},
+                "24x04": { titulo: "Cuarta Edición", resultados: [
+                    ["Elías Parra", 8], ["Marcelo Silva", 7], ["Gonzalo Silva", 6], ["Emanuel Martínez", 5], ["Fidel Parra", 4], ["Santiago Pereyra", 3], ["Renzo Gallegos", 2], ["Valentín Roldán", 1]
+                ]},
+                "24x05": { titulo: "Quinta Edición", resultados: [
+                    ["Elías Parra", 7], ["Renzo Gallegos", 6], ["Marcelo Silva", 5], ["Santiago Pereyra", 4], ["Gonzalo Silva", 3], ["Fidel Parra", 2], ["Emanuel Martínez", 1]
+                ]},
+                "24x06": { titulo: "Sexta Edición", resultados: [
+                    ["Renzo Gallegos", 7], ["Marcelo Silva", 6], ["Elías Parra", 5], ["Santiago Pereyra", 4], ["Tomás Donati", 3], ["Fidel Parra", 2], ["Máximo Bautista", 1]
+                ]},
+                "24x07": { titulo: "Séptima Edición", resultados: [
+                    ["Fidel Parra", 8], ["Marcelo Silva", 7], ["Gonzalo Silva", 6], ["Emanuel Martínez", 5], ["Elías Parra", 4], ["Santiago Pereyra", 3], ["Renzo Gallegos", 2], ["Máximo Bautista", 1]
+                ]},
+                "24x08": { titulo: "Octava Edición", resultados: [
+                    ["Marcelo Silva", 7], ["Gonzalo Silva", 6], ["Elías Parra", 5], ["Fidel Parra", 4], ["Tomás Donati", 3], ["Máximo Bautista", 2], ["Emanuel Martínez", 1]
+                ]}
+            }
+        };
+
+        /* ============================================================
+           MOTOR DE CÁLCULO
+           ============================================================ */
+        function calcularTotales(ediciones) {
+            const totales = {}, ediciones_jugadas = {};
+            Object.values(ediciones).forEach(ed => {
+                ed.resultados.forEach(([nombre, pts]) => {
+                    totales[nombre] = (totales[nombre] || 0) + pts;
+                    ediciones_jugadas[nombre] = (ediciones_jugadas[nombre] || 0) + 1;
+                });
+            });
+            return { totales, ediciones_jugadas };
+        }
+
+        /* Índice (posición cronológica) de la última edición en la que jugó un nombre,
+           dentro del ámbito recibido. Se usa como criterio de desempate: jugar más
+           recientemente pesa más que haber jugado hace tiempo. -1 si nunca jugó. */
+        function indiceUltimaEdicion(nombre, ediciones) {
+            const codigos = Object.keys(ediciones);
+            let ultimo = -1;
+            codigos.forEach((codigo, i) => {
+                if (ediciones[codigo].resultados.some(([n]) => n === nombre)) ultimo = i;
+            });
+            return ultimo;
+        }
+
+        function ordenarPorPuntaje(ediciones, totales, ediciones_jugadas) {
+            return Object.entries(totales).sort((a, b) => {
+                if (b[1] !== a[1]) return b[1] - a[1];
+                const edA = ediciones_jugadas[a[0]], edB = ediciones_jugadas[b[0]];
+                if (edA !== edB) return edA - edB;
+                const ultA = indiceUltimaEdicion(a[0], ediciones), ultB = indiceUltimaEdicion(b[0], ediciones);
+                if (ultB !== ultA) return ultB - ultA;
+                return a[0].localeCompare(b[0], 'es');
+            });
+        }
+
+        /* Coeficiente MFL: a cada jugador se le suman "m" ediciones fantasma de
+           rendimiento promedio antes de calcular su promedio. "m" se recalcula solo
+           como la mitad (1/K_COEFICIENTE) del total de ediciones jugadas en ese
+           ámbito (la temporada o el histórico), así el ajuste crece a medida que el
+           torneo acumula más ediciones. Esto evita que alguien con una sola edición
+           muy buena le gane en promedio a alguien constante con muchas ediciones.
+           Explicado en detalle en Reglamento, regla 02. */
+        const K_COEFICIENTE = 2;
+
+        function mediaGlobal(ediciones) {
+            let suma = 0, cuenta = 0;
+            Object.values(ediciones).forEach(ed => ed.resultados.forEach(([, pts]) => { suma += pts; cuenta++; }));
+            return cuenta ? suma / cuenta : 0;
+        }
+
+        function ordenarPorCoeficienteMFL(ediciones, totales, ediciones_jugadas) {
+            const m = Object.keys(ediciones).length / K_COEFICIENTE;
+            const media = mediaGlobal(ediciones);
+            return Object.entries(totales)
+                .map(([nombre, pts]) => {
+                    const n = ediciones_jugadas[nombre];
+                    const ponderado = (pts + m * media) / (n + m);
+                    return [nombre, n, pts, ponderado];
+                })
+                .sort((a, b) => {
+                    if (Math.abs(b[3] - a[3]) > 0.0001) return b[3] - a[3];
+                    if (b[1] !== a[1]) return b[1] - a[1];
+                    const ultA = indiceUltimaEdicion(a[0], ediciones), ultB = indiceUltimaEdicion(b[0], ediciones);
+                    if (ultB !== ultA) return ultB - ultA;
+                    return a[0].localeCompare(b[0], 'es');
+                });
+        }
+
+        /* En cualquier Tabla por Coeficiente MFL (de una temporada o la
+           histórica) solo cuentan los jugadores que jugaron al menos la mitad
+           de las ediciones totales de ese ámbito. */
+        function ordenarPorCoeficienteMFLCalificados(ediciones, totales, ediciones_jugadas) {
+            const minimoEdiciones = Object.keys(ediciones).length * 0.5;
+            return ordenarPorCoeficienteMFL(ediciones, totales, ediciones_jugadas)
+                .filter(([, n]) => n >= minimoEdiciones);
+        }
+
+        function formatearPromedio(promedio) {
+            return promedio.toFixed(2).replace('.', ',');
+        }
+
+        function liPuntaje([nombre, pts], i) {
+            return `<li data-pos="${i + 1}.">${nombre} (${pts} ${pts === 1 ? 'pt.' : 'pts.'})</li>`;
+        }
+
+        function liPromedio([nombre, ediciones, pts, promedio], i) {
+            const texto = formatearPromedio(promedio);
+            const esUnPunto = parseFloat(texto.replace(',', '.')) === 1;
+            return `<li data-pos="${i + 1}.">${nombre} (${ediciones} ed. • ${texto} ${esUnPunto ? 'pt.' : 'pts.'})</li>`;
+        }
+
+        function renderEdicionesHTML(anio) {
+            const ediciones = DATOS[anio];
+            const codigos = Object.keys(ediciones);
+            const botones = codigos.map((codigo, i) =>
+                `<button class="btn-edicion" data-codigo="${codigo}" onclick="mostrarEdicion(this)">${String(i + 1).padStart(2, '0')}</button>`
+            ).join('');
+            return `<div class="selector-ediciones">${botones}</div><div class="tabla-edicion"></div>`;
+        }
+
+        /* Retrasos de la cascada de filas (deben coincidir con las reglas
+           .saliendo-cascada:nth-last-child en el CSS) para poder calcular cuánto
+           dura la cascada completa según la cantidad de filas. */
+        const PASOS_CASCADA = [.04, .07, .1, .13, .16, .19, .22, .25, .28, .31];
+
+        function duracionCascada(cantidadFilas) {
+            const delayMax = cantidadFilas <= PASOS_CASCADA.length ? PASOS_CASCADA[cantidadFilas - 1] : .34;
+            return delayMax + .4; // + duración de --dur-base de cada fila individual
+        }
+
+        function plegarTabla(tabla) {
+            const filas = tabla.querySelectorAll('.lista-mfl li');
+            if (filas.length === 0) {
+                tabla.innerHTML = '';
+                return;
+            }
+            filas.forEach(li => li.classList.add('saliendo-cascada'));
+
+            // Alto real actual, para achicarlo hasta 0 en simultáneo con la cascada de filas
+            const alturaActual = tabla.scrollHeight;
+            tabla.style.height = alturaActual + 'px';
+            tabla.style.overflow = 'hidden';
+            void tabla.offsetHeight;
+            const duracion = duracionCascada(filas.length) * 0.6;
+            tabla.style.transition = `height ${duracion}s linear`;
+            tabla.style.height = '0px';
+
+            tabla.addEventListener('transitionend', function limpiar(e) {
+                if (e.propertyName !== 'height') return;
+                tabla.removeEventListener('transitionend', limpiar);
+                tabla.innerHTML = '';
+                tabla.style.height = '';
+                tabla.style.overflow = '';
+                tabla.style.transition = '';
+            });
+        }
+
+        function desplegarTabla(tabla, html) {
+            tabla.style.transition = '';
+            tabla.style.overflow = 'hidden';
+            tabla.style.height = '0px';
+            tabla.innerHTML = html;
+            void tabla.offsetHeight;
+
+            const filas = tabla.querySelectorAll('.lista-mfl li');
+            const alturaFinal = tabla.scrollHeight;
+            const duracion = duracionCascada(filas.length) * 0.6;
+            tabla.style.transition = `height ${duracion}s linear`;
+            tabla.style.height = alturaFinal + 'px';
+
+            tabla.addEventListener('transitionend', function limpiar(e) {
+                if (e.propertyName !== 'height') return;
+                tabla.removeEventListener('transitionend', limpiar);
+                tabla.style.overflow = '';
+                tabla.style.transition = '';
+                // La altura queda fija en el valor exacto que se animó (no se vuelve
+                // a 'auto') para evitar que un redondeo de subpíxel la recalcule
+                // 1px distinto y se sienta como un salto al terminar.
+            });
+        }
+
+        /* Toggle compartido por los circulitos de edición y los de PTS/MFL: si el
+           botón tocado ya estaba activo, pliega; si no, activa ese botón (y
+           desactiva los demás del mismo grupo) y despliega el HTML que arme
+           construirHtml(). */
+        function alternarBotonTabla(boton, construirHtml) {
+            const contenedorBotones = boton.parentElement;
+            const tabla = contenedorBotones.nextElementSibling;
+            const yaActivo = boton.classList.contains('activo');
+
+            contenedorBotones.querySelectorAll('.btn-edicion').forEach(b => b.classList.remove('activo'));
+
+            if (yaActivo) {
+                plegarTabla(tabla);
+                return;
+            }
+            boton.classList.add('activo');
+            desplegarTabla(tabla, construirHtml());
+        }
+
+        function mostrarEdicion(boton) {
+            alternarBotonTabla(boton, () => {
+                const codigo = boton.dataset.codigo;
+                let edicion = null;
+                for (const anio in DATOS) {
+                    if (DATOS[anio][codigo]) { edicion = DATOS[anio][codigo]; break; }
+                }
+                const ordenado = [...edicion.resultados].sort((a, b) => b[1] - a[1]);
+                return `<ul class="lista-mfl">${ordenado.map(liPuntaje).join('')}</ul>`;
+            });
+        }
+
+        function renderRankingsHTML(ediciones) {
+            return `<div class="selector-ediciones">
+                        <button class="btn-edicion" data-tipo="puntaje" onclick="mostrarRankingTemporada(this)">PTS</button>
+                        <button class="btn-edicion" data-tipo="mfl" onclick="mostrarRankingTemporada(this)">MFL</button>
+                    </div>
+                    <div class="tabla-edicion"></div>`;
+        }
+
+        function mostrarRankingTemporada(boton) {
+            alternarBotonTabla(boton, () => {
+                const tipo = boton.dataset.tipo;
+                const anioActivo = document.querySelector('#selectorAnios .btn-slider.activo').dataset.valor;
+                const ediciones = DATOS[anioActivo];
+                const { totales, ediciones_jugadas } = calcularTotales(ediciones);
+                return tipo === 'mfl'
+                    ? `<ul class="lista-mfl">${ordenarPorCoeficienteMFLCalificados(ediciones, totales, ediciones_jugadas).map(liPromedio).join('')}</ul>`
+                    : `<ul class="lista-mfl">${ordenarPorPuntaje(ediciones, totales, ediciones_jugadas).map(liPuntaje).join('')}</ul>`;
+            });
+        }
+
+        function renderTemporadaHTML(anio) {
+            return `
+                <div class="grupo-temporada">
+                    <p class="etiqueta-grupo">Ediciones</p>
+                    <div class="desplegable-contenido">${renderEdicionesHTML(anio)}</div>
+                </div>
+                <div class="grupo-temporada">
+                    <p class="etiqueta-grupo">Rankings</p>
+                    <div class="desplegable-contenido">${renderRankingsHTML(DATOS[anio])}</div>
+                </div>`;
+        }
+
+        function calcularTotalesHistoricos() {
+            const totales = {}, ediciones_jugadas = {};
+            Object.keys(DATOS).forEach(anio => {
+                const t = calcularTotales(DATOS[anio]);
+                Object.keys(t.totales).forEach(nombre => {
+                    totales[nombre] = (totales[nombre] || 0) + t.totales[nombre];
+                    ediciones_jugadas[nombre] = (ediciones_jugadas[nombre] || 0) + t.ediciones_jugadas[nombre];
+                });
+            });
+            return { totales, ediciones_jugadas };
+        }
+
+        function todasLasEdicionesCombinadas() {
+            const todas = {};
+            Object.keys(DATOS).forEach(anio => Object.assign(todas, DATOS[anio]));
+            return todas;
+        }
+
+        function renderHistoricoTabla(tipo) {
+            const ediciones = todasLasEdicionesCombinadas();
+            const { totales, ediciones_jugadas } = calcularTotalesHistoricos();
+            if (tipo === 'mfl') {
+                return `<ul class="lista-mfl">${ordenarPorCoeficienteMFLCalificados(ediciones, totales, ediciones_jugadas).map(liPromedio).join('')}</ul>`;
+            }
+            return `<ul class="lista-mfl">${ordenarPorPuntaje(ediciones, totales, ediciones_jugadas).map(liPuntaje).join('')}</ul>`;
+        }
+
+        /* ============================================================
+           CAMPEONES — el ganador de cada edición ya es el primer puesto
+           de esa tabla; no hace falta cargar ningún dato nuevo.
+           ============================================================ */
+        function calcularCampeones() {
+            const campeones = {};
+            Object.keys(DATOS).forEach(anio => {
+                Object.entries(DATOS[anio]).forEach(([codigo, ed]) => {
+                    const ganador = [...ed.resultados].sort((a, b) => b[1] - a[1])[0][0];
+                    if (!campeones[ganador]) campeones[ganador] = [];
+                    campeones[ganador].push(codigo);
+                });
+            });
+            return campeones;
+        }
+
+        function ordenarCampeones(campeones) {
+            const ordenGlobal = Object.keys(todasLasEdicionesCombinadas());
+            return Object.entries(campeones).sort((a, b) => {
+                if (b[1].length !== a[1].length) return b[1].length - a[1].length;
+                const ultA = Math.max(...a[1].map(c => ordenGlobal.indexOf(c)));
+                const ultB = Math.max(...b[1].map(c => ordenGlobal.indexOf(c)));
+                if (ultB !== ultA) return ultB - ultA;
+                return a[0].localeCompare(b[0], 'es');
+            });
+        }
+
+        /* Sonido de "brillo": una nota por cada estrella, sonando justo cuando
+           esa estrella rebota. ESPACIADO_REBOTE_MS debe coincidir con los 0.5s
+           de animation-delay entre estrellas en el CSS (.campeon-estrellas
+           .estrella:nth-child), así el sonido queda sincronizado con el
+           movimiento. Escala mayor ascendente (Do·Re·Mi·Fa·Sol...), sintetizada
+           con Web Audio sin archivos externos. Cada nota se crea y arranca en
+           su propio momento real (setTimeout) en vez de agendarse toda de una
+           contra el reloj interno de audio, para evitar que algunos
+           navegadores (sobre todo en celular) solo dejen sonar la primera. */
+        let audioCtxCampeones = null;
+        const SEMITONOS_ESCALA_MAYOR = [0, 2, 4, 5, 7, 9, 11]; // Do Re Mi Fa Sol La Ti
+        const FRECUENCIA_DO_BASE = 2093.00; // C7
+        const ESPACIADO_REBOTE_MS = 500;
+
+        function tocarNota(indice) {
+            try {
+                const ctx = audioCtxCampeones;
+                const semitonos = SEMITONOS_ESCALA_MAYOR[indice % 7] + 12 * Math.floor(indice / 7);
+                const freq = FRECUENCIA_DO_BASE * Math.pow(2, semitonos / 12);
+                const ahora = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0, ahora);
+                gain.gain.linearRampToValueAtTime(0.1, ahora + 0.015);
+                gain.gain.exponentialRampToValueAtTime(0.0001, ahora + 0.4);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(ahora);
+                osc.stop(ahora + 0.45);
+            } catch (e) {
+                // Web Audio no disponible en este navegador: se ignora en silencio.
+            }
+        }
+
+        function reproducirBrillo(cantidadEstrellas) {
+            try {
+                audioCtxCampeones = audioCtxCampeones || new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtxCampeones.state === 'suspended') audioCtxCampeones.resume();
+                for (let i = 0; i < cantidadEstrellas; i++) {
+                    setTimeout(() => tocarNota(i), i * ESPACIADO_REBOTE_MS);
+                }
+            } catch (e) {
+                // Web Audio no disponible en este navegador: se ignora en silencio.
+            }
+        }
+
+        function renderCampeones() {
+            const campeones = ordenarCampeones(calcularCampeones());
+            const html = campeones.map(([nombre, codigos], i) => {
+                const estrellas = codigos.map(() => `<span class="estrella">★</span>`).join('');
+                const filas = codigos.map(c => `<li data-pos="•">${c}</li>`).join('');
+                return `<details class="fila-campeon">
+                    <summary>
+                        <span class="campeon-titulo"><span class="campeon-pos">${i + 1}.</span><span class="campeon-nombre">${nombre}</span></span>
+                        <span class="campeon-estrellas">${estrellas}</span>
+                    </summary>
+                    <div class="desplegable-contenido"><ul class="lista-mfl">${filas}</ul></div>
+                </details>`;
+            }).join('');
+            document.getElementById('listaCampeones').innerHTML = html;
+
+            document.querySelectorAll('#listaCampeones .fila-campeon').forEach(fila => {
+                fila.open = false; // por si el navegador restaura un estado previo (pasa en Safari/iOS)
+                let porInteraccion = false;
+                fila.querySelector('summary').addEventListener('pointerdown', () => { porInteraccion = true; });
+                fila.addEventListener('toggle', () => {
+                    if (!fila.open || !porInteraccion) { porInteraccion = false; return; }
+                    porInteraccion = false;
+                    const estrellas = fila.querySelector('.campeon-estrellas');
+                    estrellas.classList.remove('rebote');
+                    void estrellas.offsetWidth;
+                    estrellas.classList.add('rebote');
+                    reproducirBrillo(fila.querySelectorAll('.estrella').length);
+                });
+            });
+        }
+
+        /* ============================================================
+           REGLAMENTO — datos + render
+           ============================================================ */
+        const REGLAS = [
+            { num: '01', texto: 'El torneo se organiza en temporadas divididas en ediciones de temática variable a lo largo del año. Para cada edición se confecciona una tabla de posiciones específica donde el ganador se lleva tantos puntos como participantes jueguen esa fecha; por ejemplo, en una edición de 10 jugadores, el primero suma 10 puntos. El último clasificado siempre obtiene 1 punto y el resto escala de forma proporcional. En paralelo, las Tablas Generales de la temporada acumulan y/o promedian los puntos obtenidos en cada edición para definir a los campeones absolutos.' },
+            { num: '02', texto: 'Las Tablas Generales son dos: una se basa en la sumatoria directa de los puntos obtenidos en ese ámbito, y la otra se basa en el promedio de los puntos obtenidos y la cantidad de ediciones disputadas por cada jugador, afectado a su vez por un factor de ajuste que denominamos el Coeficiente MFL. Sin este factor, alguien que jugó menos ediciones y le fue muy bien superaría en el ranking a quien jugó muchas veces con buen nivel. Se calcula así: se toma el total de ediciones jugadas en ese ámbito —la temporada o el histórico— y se suma la mitad de esa cantidad tanto a las ediciones de cada jugador como a sus puntos, usando para esa parte extra el promedio general de puntos del ámbito. Por ejemplo: con 8 ediciones en una temporada se suman 4; con 16 en el histórico, se suman 8. Después se divide el total de puntos (los reales más los sumados) entre el total de ediciones (las reales más las sumadas). Cuanto más jugó un jugador respecto al total disponible, menos pesa este ajuste y más se acerca su Coeficiente MFL a su promedio real. En las Tablas por Coeficiente MFL solo cuentan los jugadores que jugaron al menos la mitad de las ediciones totales de ese ámbito.' },
+            { num: '03', texto: 'Cada edición requiere un mínimo de 5 participantes para ser contabilizada de manera oficial y tiene un cupo máximo estricto de 10 jugadores. Si asisten 4 o menos no computa para las Tablas Generales. El sistema de inscripción se rige bajo la premisa de orden de llegada: los primeros 10 miembros del grupo en confirmar su asistencia aseguran su plaza. Todo jugador debe permanecer durante toda la jornada; en caso de retiro anticipado o llegada tardía que impida disputar los cruces, los partidos faltantes se computarán como derrotas automáticas por un resultado de 3-0. Asimismo, el participante que confirme su asistencia y no se presente a la jornada sufrirá una penalización directa de 3 puntos en la Tabla General por Puntaje de la temporada, afectando a su vez su promedio en la Tabla General por Coeficiente MFL.' },
+            { num: '04', texto: 'Los equipos disponibles en cada edición surgen de su temática, y se asignan a los jugadores mediante un sistema de doble transparencia. En primer lugar, se utiliza una ruleta con los nombres de los jugadores presentes para determinar el orden de elección. Siguiendo ese orden, cada participante gira una segunda ruleta con los equipos previamente seleccionados para obtener el suyo. Una vez asignado el equipo no se permiten cambios bajo ninguna circunstancia para garantizar la equidad de la competencia.' },
+            { num: '05', texto: 'Los encuentros otorgan 3 puntos por victoria, 1 por empate y 0 por derrota, definiéndose la localía mediante piedra, papel o tijera antes de empezar. En caso de repetir cruce, se juega obligatoriamente un partido de local y otro de visitante. El formato de la competencia y la duración de los tiempos se autocalibran según la asistencia para asegurar que la jornada presencial no supere las 3 horas totales, distribuyéndose de la siguiente manera:',
+              lista: [
+                'Con 5 jugadores se disputan 15 partidos totales (6 por jugador) a 5 minutos por tiempo.',
+                'Con 6 jugadores se juega una liga única de todos contra todos a una sola vuelta, sumando 15 partidos a 4 minutos por tiempo.',
+                'Con 7 jugadores se asignan 14 partidos totales (4 por jugador) a 5 minutos por tiempo.',
+                'Con 8 jugadores se generan 16 partidos totales (4 por jugador) a 4 minutos por tiempo.',
+                'Con 9 jugadores se disputan 18 partidos totales (4 por jugador) a 3 minutos por tiempo.',
+                'Con 10 jugadores se desarrollan 15 partidos totales (3 por jugador) a 4 minutos por tiempo.'
+              ] },
+            { num: '06', texto: 'Si dos o más participantes igualan en puntos al finalizar una edición, las posiciones se definen estrictamente bajo el orden de diferencia de goles, goles a favor y goles en contra. De persistir la igualdad, se consideran las tarjetas rojas, tarjetas amarillas y las faltas cometidas en esa edición. En el caso extremo de un empate absoluto en todas las estadísticas, se disputará un partido de desempate con prórroga y tanda de penales si fuera necesario.' },
+            { num: '07', texto: 'Todos los jugadores deben mantener un comportamiento respetuoso y deportivo. Cualquier actitud antideportiva será evaluada por la organización y podrá ser sancionada con advertencias, quita de puntos, descalificación de la fecha o la expulsión directa del torneo. Las partidas se disputan bajo los parámetros predeterminados del juego sin ayudas externas de ningún tipo. Ante cualquier falla técnica irreversible o desconexión ajena a los jugadores durante un partido, ese partido se reiniciará desde cero.' }
+        ];
+
+        function renderRegla(num) {
+            const regla = REGLAS.find(r => r.num === num);
+            let html = `<p class="regla-bloque">${regla.texto}</p>`;
+            if (regla.lista) {
+                html += `<ul class="lista-mfl">${regla.lista.map(t => `<li data-pos="•">${t}</li>`).join('')}</ul>`;
+            }
+            return html;
+        }
+
+        /* ============================================================
+           PREMIOS — datos + render
+           ============================================================ */
+        const PREMIOS = {
+            cristiano: {
+                nombre: 'El Bicho',
+                descripcion: 'Este premio rinde homenaje a Cristiano Ronaldo, reconocido como el máximo goleador de la historia del fútbol profesional. Se otorga al jugador o jugadores que hayan anotado la mayor cantidad de goles en la edición, en reconocimiento a su capacidad goleadora, eficacia ofensiva y liderazgo dentro del campo de juego. Se entrega desde la edición 24x05.',
+                ganadores: [
+                    ['Elías Parra', '24x05 • 24x06 • 25x06 • 26x02'],
+                    ['Renzo Gallegos', '24x05 • 24x06 • 25x03 • 26x01'],
+                    ['Santiago Pereyra', '24x05 • 25x01'],
+                    ['Emanuel Marqués', '25x05'],
+                    ['Gonzalo Silva', '25x04'],
+                    ['Agustín Marqués', '25x02'],
+                    ['Fidel Parra', '24x08'],
+                    ['Marcelo Silva', '24x07']
+                ]
+            },
+            maldini: {
+                nombre: 'La Muralla',
+                descripcion: 'Este premio rinde homenaje a Paolo Maldini, considerado uno de los mejores defensores de la historia del fútbol. Se otorga al jugador o jugadores con menor cantidad de goles recibidos en la edición, en reconocimiento a su solidez defensiva, disciplina táctica y capacidad para proteger a su equipo. Se entrega desde la edición 24x05.',
+                ganadores: [
+                    ['Elías Parra', '24x05 • 24x07 • 25x04 • 25x06 • 26x01'],
+                    ['Marcelo Silva', '24x05 • 24x08 • 25x07'],
+                    ['Fidel Parra', '24x07 • 26x02'],
+                    ['Santiago Pereyra', '25x01 • 25x04'],
+                    ['Emanuel Marqués', '25x05'],
+                    ['Franco Aguirre', '25x03'],
+                    ['Agustín Marqués', '25x02'],
+                    ['Renzo Gallegos', '24x06']
+                ]
+            },
+            ronaldinho: {
+                nombre: 'El Mago',
+                descripcion: 'Este premio rinde homenaje a Ronaldinho, reconocido como uno de los futbolistas más creativos, talentosos y espectaculares de todos los tiempos. Se otorga al jugador que haya anotado el gol más destacado de la edición, ya sea por su belleza, dificultad técnica o importancia en el desarrollo del torneo. Se entrega desde la edición 24x06.',
+                ganadores: [
+                    ['Gonzalo Silva', '25x04 • 26x01'],
+                    ['Agustín Marqués', '25x02 • 25x06'],
+                    ['Fidel Parra', '24x07 • 25x03'],
+                    ['Renzo Gallegos', '24x06 • 25x01'],
+                    ['Diego Aragón', '26x02'],
+                    ['Benjamín Márquez', '25x05'],
+                    ['Emanuel Martínez', '24x08']
+                ]
+            },
+            cruyff: {
+                nombre: 'La Furia',
+                descripcion: 'Este premio rinde homenaje a Johan Cruyff, máximo exponente del fútbol total y ampliamente reconocido como uno de los futbolistas más completos de la historia. Se otorga una sola vez por temporada al primer jugador que, además de destacarse tanto en ataque como en defensa, haya sumado también El Bicho, La Muralla y El Mago en esa misma temporada.',
+                ganadores: [
+                    ['Agustín Marqués', 'Temporada 2025'],
+                    ['Renzo Gallegos', 'Temporada 2024']
+                ]
+            }
+        };
+
+        function renderPremio(id) {
+            const p = PREMIOS[id];
+            const filas = p.ganadores.map(([nombre, detalle], i) => `<li data-pos="${i + 1}.">${nombre} (${detalle})</li>`).join('');
+            return `<p class="regla-bloque">${p.descripcion}</p><ul class="lista-mfl">${filas}</ul>`;
+        }
+
+        /* ============================================================
+           CONTROL DESLIZANTE GENÉRICO (botones + indicador + uno o más paneles flotantes)
+           ============================================================ */
+        function crearSelectorDeslizante({ contenedorId, indicadorId, paneles, opciones, inicial }) {
+            const cont = document.getElementById(contenedorId);
+            cont.innerHTML = `<span class="indicador-slider" id="${indicadorId}"></span>` + opciones
+                .map(o => `<button class="btn-slider" data-valor="${o.valor}">${o.etiqueta}</button>`)
+                .join('');
+
+            function mover(boton) {
+                const indicador = document.getElementById(indicadorId);
+                indicador.style.width = boton.offsetWidth + 'px';
+                indicador.style.transform = `translateX(${boton.offsetLeft}px)`;
+            }
+
+            function seleccionar(valor) {
+                let botonActivo = null;
+                cont.querySelectorAll('.btn-slider').forEach(b => {
+                    const esActivo = b.dataset.valor === String(valor);
+                    b.classList.toggle('activo', esActivo);
+                    if (esActivo) botonActivo = b;
+                });
+                if (botonActivo) mover(botonActivo);
+
+                paneles.forEach(p => {
+                    const panel = document.getElementById(p.id);
+                    panel.classList.remove('entrar');
+                    panel.innerHTML = p.render(valor);
+                    void panel.offsetWidth;
+                    panel.classList.add('entrar');
+                });
+            }
+
+            cont.querySelectorAll('.btn-slider').forEach(b => {
+                b.addEventListener('click', () => seleccionar(b.dataset.valor));
+            });
+            window.addEventListener('resize', () => {
+                const activo = cont.querySelector('.btn-slider.activo');
+                if (activo) mover(activo);
+            });
+
+            seleccionar(inicial);
+        }
+
+        function inicializarSliders() {
+            const anios = Object.keys(DATOS).sort((a, b) => a - b);
+            crearSelectorDeslizante({
+                contenedorId: 'selectorAnios', indicadorId: 'indicadorAnio',
+                paneles: [{ id: 'panelAnio', render: renderTemporadaHTML }],
+                opciones: anios.map(a => ({ valor: a, etiqueta: a })),
+                inicial: anios[anios.length - 1]
+            });
+
+            crearSelectorDeslizante({
+                contenedorId: 'selectorReglas', indicadorId: 'indicadorRegla',
+                paneles: [{ id: 'panelRegla', render: renderRegla }],
+                opciones: REGLAS.map(r => ({ valor: r.num, etiqueta: r.num })),
+                inicial: REGLAS[0].num
+            });
+
+            crearSelectorDeslizante({
+                contenedorId: 'selectorPremios', indicadorId: 'indicadorPremio',
+                paneles: [{ id: 'panelPremio', render: renderPremio }],
+                opciones: Object.entries(PREMIOS).map(([id, p]) => ({ valor: id, etiqueta: p.nombre })),
+                inicial: 'cristiano'
+            });
+
+            crearSelectorDeslizante({
+                contenedorId: 'selectorHistorico', indicadorId: 'indicadorHistorico',
+                paneles: [{ id: 'panelHistorico', render: renderHistoricoTabla }],
+                opciones: [{ valor: 'puntaje', etiqueta: 'PTS' }, { valor: 'mfl', etiqueta: 'MFL' }],
+                inicial: 'puntaje'
+            });
+        }
+
+        /* ============================================================
+           NAVEGACIÓN (tabs + routing por URL)
+           ============================================================ */
+        const SECCIONES = ['inicio', 'reglamento', 'eventos', 'premios', 'temporadas', 'campeones', 'historico'];
+        const menuBtn = document.getElementById('menuBtn');
+        const menuNav = document.getElementById('menuNav');
+
+        function toggleMenu() {
+            const active = menuNav.classList.toggle('active');
+            menuBtn.textContent = active ? 'Cerrar' : 'Menú';
+            menuBtn.setAttribute('aria-expanded', active);
+            document.body.style.overflow = active ? 'hidden' : 'auto';
+        }
+
+        function resincronizarIndicadores(seccionEl) {
+            seccionEl.querySelectorAll('.selector-slider').forEach(cont => {
+                const activo = cont.querySelector('.btn-slider.activo');
+                const indicador = cont.querySelector('.indicador-slider');
+                if (activo && indicador) {
+                    indicador.style.width = activo.offsetWidth + 'px';
+                    indicador.style.transform = `translateX(${activo.offsetLeft}px)`;
+                }
+            });
+        }
+
+        function navegar(idSeccion, actualizarHash = true) {
+            if (!SECCIONES.includes(idSeccion)) idSeccion = 'inicio';
+            if (menuNav.classList.contains('active')) toggleMenu();
+
+            document.querySelectorAll('.seccion').forEach(sec => sec.classList.remove('active'));
+            const destino = document.getElementById(idSeccion);
+            if (destino) {
+                destino.classList.add('active');
+                resincronizarIndicadores(destino);
+                if (idSeccion === 'campeones') renderCampeones();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            document.querySelectorAll('.menu-desplegable a[data-seccion]').forEach(a => {
+                a.classList.toggle('activo', a.dataset.seccion === idSeccion);
+            });
+
+            if (actualizarHash && location.hash.slice(1) !== idSeccion) {
+                try {
+                    history.pushState(null, '', '#' + idSeccion);
+                } catch (e) {
+                    // Algunos entornos (iframes sandboxeados, previsualizaciones) no permiten
+                    // pushState por política de origen. La navegación por tabs sigue funcionando igual.
+                }
+            }
+        }
+
+        window.addEventListener('popstate', () => {
+            navegar(location.hash.slice(1) || 'inicio', false);
+        });
+
+        /* ============================================================
+           SORTEO EN VIVO (Eventos): dos ruletas en canvas.
+           1) Sortea el orden J1..J5 entre los jugadores presentes.
+           2) Siguiendo ese orden, sortea qué equipo le toca a cada uno.
+           Al terminar, reescribe el Fixture con los resultados reales.
+           ============================================================ */
+        /* Sonido de las ruletas: un "tic" corto cada vez que el puntero cruza a
+           una porción nueva mientras gira, y un acorde brillante al detenerse.
+           Mismo patrón de Web Audio sintetizado (sin archivos externos) que ya
+           usa el rebote de estrellas en Campeones, con su propio AudioContext
+           para no interferir con ese. */
+        let audioCtxRuletas = null;
+        function obtenerAudioCtxRuletas() {
+            audioCtxRuletas = audioCtxRuletas || new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtxRuletas.state === 'suspended') audioCtxRuletas.resume();
+            return audioCtxRuletas;
+        }
+
+        function tocarTicRuleta() {
+            try {
+                const ctx = obtenerAudioCtxRuletas();
+                const ahora = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'square';
+                osc.frequency.value = 900;
+                gain.gain.setValueAtTime(0.05, ahora);
+                gain.gain.exponentialRampToValueAtTime(0.0001, ahora + 0.05);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(ahora);
+                osc.stop(ahora + 0.06);
+            } catch (e) {
+                // Web Audio no disponible en este navegador: se ignora en silencio.
+            }
+        }
+
+        function tocarGanadorRuleta() {
+            try {
+                const ctx = obtenerAudioCtxRuletas();
+                const notas = [880.00, 1108.73, 1318.51]; // La5 · Do#6 · Mi6, acorde mayor brillante
+                notas.forEach((freq, i) => {
+                    const ahora = ctx.currentTime + i * 0.08;
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0, ahora);
+                    gain.gain.linearRampToValueAtTime(0.12, ahora + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, ahora + 0.5);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(ahora);
+                    osc.stop(ahora + 0.55);
+                });
+            } catch (e) {
+                // Web Audio no disponible en este navegador: se ignora en silencio.
+            }
+        }
+
+        const JUGADORES_26X02 = ['Marcelo Silva', 'Elías Parra', 'Renzo Gallegos', 'Fidel Parra', 'Diego Aragón'];
+        const EQUIPOS_MUNDIAL_2026 = [
+            'México', 'Sudáfrica', 'Corea del Sur', 'República Checa',
+            'Canadá', 'Suiza', 'Catar', 'Bosnia y Herzegovina',
+            'Brasil', 'Marruecos', 'Escocia', 'Haití',
+            'Estados Unidos', 'Paraguay', 'Australia', 'Turquía',
+            'Alemania', 'Ecuador', 'Costa de Marfil', 'Curazao',
+            'Países Bajos', 'Japón', 'Suecia', 'Túnez',
+            'Bélgica', 'Egipto', 'Irán', 'Nueva Zelanda',
+            'España', 'Uruguay', 'Arabia Saudita', 'Cabo Verde',
+            'Francia', 'Senegal', 'Noruega', 'Irak',
+            'Argentina', 'Argelia', 'Austria', 'Jordania',
+            'Portugal', 'Colombia', 'Uzbekistán', 'RD Congo',
+            'Inglaterra', 'Croacia', 'Ghana', 'Panamá'
+        ];
+
+        let jugadoresRestantes = [];
+        let ordenSorteado = [];      // nombres, en orden J1..J5
+        let equiposRestantes = [];
+        let equiposAsignados = {};   // { 1: 'España', 2: 'Brasil', ... } por número de jugador
+        let ruletaGirando = false;
+
+        function colorBorde() { return getComputedStyle(document.documentElement).getPropertyValue('--borde').trim(); }
+
+        /* Paleta pastel solo para las ruletas — el resto del sitio se mantiene en
+           escala de grises, esto es la única excepción a propósito. Los colores
+           son siempre claros, así que el texto queda fijo en un tono oscuro sin
+           depender de modo claro/oscuro. */
+        const PALETA_PASTEL_RULETA = ['#F0F0F2', '#E2E2E5', '#EAEAEC', '#D6D6DA', '#ECECEC', '#DCDCE0', '#E6E6E8', '#D0D0D4'];
+        const TEXTO_SOBRE_PASTEL = '#2b2b2d';
+        const BORDE_SOBRE_PASTEL = 'rgba(0, 0, 0, 0.12)';
+        const TAMANO_RULETA = 290; // tamaño lógico (CSS) fijo; el real se ajusta a la pantalla en prepararCanvasRetina
+
+        /* En pantallas de alta densidad (retina), 1 píxel CSS ocupa varios píxeles
+           reales. Si el canvas solo tiene 260x260 píxeles de verdad, el navegador
+           los estira para llenar esos 260px de pantalla y el texto sale borroso.
+           Esto agranda el lienzo real según devicePixelRatio y reescala el
+           contexto para que se siga dibujando en las mismas coordenadas lógicas. */
+        function prepararCanvasRetina(canvas) {
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = TAMANO_RULETA * dpr;
+            canvas.height = TAMANO_RULETA * dpr;
+            canvas.style.width = TAMANO_RULETA + 'px';
+            canvas.style.height = TAMANO_RULETA + 'px';
+            canvas.getContext('2d').scale(dpr, dpr);
+        }
+
+        function dibujarRuleta(canvas, opciones, rotacion) {
+            const ctx = canvas.getContext('2d');
+            const w = TAMANO_RULETA, h = TAMANO_RULETA, cx = w / 2, cy = h / 2, r = Math.min(cx, cy) - 3;
+            ctx.clearRect(0, 0, w, h);
+            const n = opciones.length;
+            if (n === 0) {
+                ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                ctx.fillStyle = colorBorde(); ctx.fill();
+                return;
+            }
+            const porSlice = (Math.PI * 2) / n;
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(rotacion);
+            for (let i = 0; i < n; i++) {
+                const ini = i * porSlice, fin = ini + porSlice;
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.arc(0, 0, r, ini, fin);
+                ctx.closePath();
+                ctx.fillStyle = PALETA_PASTEL_RULETA[i % PALETA_PASTEL_RULETA.length];
+                ctx.fill();
+                ctx.strokeStyle = BORDE_SOBRE_PASTEL;
+                ctx.stroke();
+
+                ctx.save();
+                ctx.rotate(ini + porSlice / 2);
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = TEXTO_SOBRE_PASTEL;
+                const tamFuente = n > 20 ? 10 : n > 8 ? 12 : 14;
+                ctx.font = `600 ${tamFuente}px var(--fuente), -apple-system, sans-serif`;
+                ctx.fillText(opciones[i], r - 10, 1);
+                ctx.restore();
+            }
+            ctx.restore();
+        }
+
+        function girarHaciaOpcion(canvas, opciones, indiceGanador, alTerminar) {
+            const inicio = performance.now();
+            const duracionMs = 3200;
+            const porSlice = (Math.PI * 2) / opciones.length;
+            // Ángulo final: varias vueltas completas + lo necesario para que el
+            // centro de la porción ganadora quede justo bajo el puntero (arriba).
+            const centroGanador = indiceGanador * porSlice + porSlice / 2;
+            const vueltasExtra = 5 * Math.PI * 2;
+            const destino = vueltasExtra + (Math.PI * 1.5 - centroGanador);
+            let segmentoAnterior = null;
+
+            // Ease-out con un leve rebote al final (se pasa un poquito y vuelve),
+            // como una ruleta real asentándose, en vez de frenar en seco.
+            function easeOutRebote(t) {
+                const c1 = 0.5, c3 = c1 + 1;
+                return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+            }
+
+            function paso(ahora) {
+                const t = Math.min(1, (ahora - inicio) / duracionMs);
+                const suavizado = easeOutRebote(t);
+                const rotacionActual = destino * suavizado;
+                dibujarRuleta(canvas, opciones, rotacionActual);
+
+                // Tic sonoro cada vez que el puntero cruza a una porción nueva
+                const anguloBajoPuntero = (((Math.PI * 1.5 - rotacionActual) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+                const segmentoActual = Math.floor(anguloBajoPuntero / porSlice);
+                if (segmentoActual !== segmentoAnterior) {
+                    tocarTicRuleta();
+                    segmentoAnterior = segmentoActual;
+                }
+
+                if (t < 1) {
+                    requestAnimationFrame(paso);
+                } else {
+                    tocarGanadorRuleta();
+                    canvas.parentElement.classList.remove('gano');
+                    void canvas.parentElement.offsetWidth;
+                    canvas.parentElement.classList.add('gano');
+                    alTerminar();
+                }
+            }
+            requestAnimationFrame(paso);
+        }
+
+        function girarRuletaJugadores() {
+            if (ruletaGirando || jugadoresRestantes.length === 0) return;
+            ruletaGirando = true;
+            const contenedor = document.getElementById('contenedorRuletaJugadores');
+            contenedor.classList.add('deshabilitada');
+
+            const canvas = document.getElementById('ruletaJugadores');
+            const indice = Math.floor(Math.random() * jugadoresRestantes.length);
+            const elegido = jugadoresRestantes[indice];
+
+            girarHaciaOpcion(canvas, jugadoresRestantes, indice, () => {
+                ordenSorteado.push(elegido);
+                jugadoresRestantes.splice(indice, 1);
+
+                const lista = document.getElementById('resultadosJugadores');
+                lista.insertAdjacentHTML('beforeend', `<li>J${ordenSorteado.length} · ${elegido}</li>`);
+
+                if (jugadoresRestantes.length > 1) {
+                    document.getElementById('tituloRuletaJugadores').textContent = `Sorteando (J${ordenSorteado.length + 1})`;
+                    dibujarRuleta(canvas, jugadoresRestantes, 0);
+                    contenedor.classList.remove('deshabilitada');
+                    ruletaGirando = false;
+                } else if (jugadoresRestantes.length === 1) {
+                    // Con un solo nombre restante ya sabemos quién es: se asigna
+                    // solo, sin hacer girar la ruleta para algo sin suspenso real.
+                    const ultimo = jugadoresRestantes[0];
+                    document.getElementById('tituloRuletaJugadores').textContent = `J${ordenSorteado.length + 1}: ${ultimo}`;
+                    dibujarRuleta(canvas, jugadoresRestantes, 0);
+                    setTimeout(() => {
+                        ordenSorteado.push(ultimo);
+                        jugadoresRestantes = [];
+                        lista.insertAdjacentHTML('beforeend', `<li>J${ordenSorteado.length} · ${ultimo}</li>`);
+                        document.getElementById('tituloRuletaJugadores').textContent = 'Orden sorteado ✓';
+                        contenedor.classList.remove('gano');
+                        void contenedor.offsetWidth;
+                        contenedor.classList.add('gano');
+                        tocarGanadorRuleta();
+                        ruletaGirando = false;
+                        iniciarSorteoDeEquipos();
+                    }, 900);
+                } else {
+                    document.getElementById('tituloRuletaJugadores').textContent = 'Orden sorteado ✓';
+                    contenedor.classList.add('deshabilitada');
+                    ruletaGirando = false;
+                    iniciarSorteoDeEquipos();
+                }
+            });
+        }
+
+        function iniciarSorteoDeEquipos() {
+            equiposRestantes = [...EQUIPOS_MUNDIAL_2026];
+            document.getElementById('bloqueRuletaEquipos').style.display = 'flex';
+            document.getElementById('contenedorRuletaEquipos').classList.remove('deshabilitada');
+            document.getElementById('tituloRuletaEquipos').textContent = `Equipo para J1 (${ordenSorteado[0]})`;
+            dibujarRuleta(document.getElementById('ruletaEquipos'), equiposRestantes, 0);
+            document.getElementById('bloqueRuletaEquipos').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function girarRuletaEquipos() {
+            if (ruletaGirando) return;
+            const turno = Object.keys(equiposAsignados).length; // 0..4
+            if (turno >= ordenSorteado.length) return;
+            ruletaGirando = true;
+            const contenedor = document.getElementById('contenedorRuletaEquipos');
+            contenedor.classList.add('deshabilitada');
+
+            const canvas = document.getElementById('ruletaEquipos');
+            const indice = Math.floor(Math.random() * equiposRestantes.length);
+            const elegido = equiposRestantes[indice];
+            const numeroJugador = turno + 1;
+
+            girarHaciaOpcion(canvas, equiposRestantes, indice, () => {
+                equiposAsignados[numeroJugador] = elegido;
+                equiposRestantes.splice(indice, 1);
+
+                const lista = document.getElementById('resultadosEquipos');
+                lista.insertAdjacentHTML('beforeend', `<li>J${numeroJugador} · ${ordenSorteado[numeroJugador - 1]} → ${elegido}</li>`);
+
+                const siguienteTurno = numeroJugador; // 0-indexado para el próximo jugador
+                if (siguienteTurno < ordenSorteado.length) {
+                    document.getElementById('tituloRuletaEquipos').textContent = `Equipo para J${siguienteTurno + 1} (${ordenSorteado[siguienteTurno]})`;
+                    dibujarRuleta(canvas, equiposRestantes, 0);
+                    contenedor.classList.remove('deshabilitada');
+                } else {
+                    document.getElementById('tituloRuletaEquipos').textContent = 'Sorteo completo ✓';
+                    contenedor.classList.add('deshabilitada');
+                    document.getElementById('btnReiniciarSorteo').style.display = 'inline-block';
+                    actualizarFixtureConResultados();
+                }
+                ruletaGirando = false;
+            });
+        }
+
+        function actualizarFixtureConResultados() {
+            document.querySelectorAll('.linea-partido').forEach((p, i) => {
+                const local = p.dataset.local, visita = p.dataset.visita;
+                const nombreLocal = ordenSorteado[local - 1], nombreVisita = ordenSorteado[visita - 1];
+                const equipoLocal = equiposAsignados[local], equipoVisita = equiposAsignados[visita];
+                const sortear = p.dataset.sortear ? ' (sortear localía)' : '';
+                p.innerHTML = `<strong>Partido ${i + 1}:</strong> ${nombreLocal} (${equipoLocal}) vs ${nombreVisita} (${equipoVisita})${sortear}`;
+            });
+        }
+
+        function reiniciarSorteo() {
+            jugadoresRestantes = [...JUGADORES_26X02];
+            ordenSorteado = [];
+            equiposRestantes = [];
+            equiposAsignados = {};
+            document.getElementById('resultadosJugadores').innerHTML = '';
+            document.getElementById('resultadosEquipos').innerHTML = '';
+            document.getElementById('tituloRuletaJugadores').textContent = 'Sorteando (J1)';
+            document.getElementById('contenedorRuletaJugadores').classList.remove('deshabilitada');
+            document.getElementById('bloqueRuletaEquipos').style.display = 'none';
+            document.getElementById('contenedorRuletaEquipos').classList.remove('deshabilitada');
+            document.getElementById('btnReiniciarSorteo').style.display = 'none';
+            dibujarRuleta(document.getElementById('ruletaJugadores'), jugadoresRestantes, 0);
+            document.querySelectorAll('.linea-partido').forEach((p, i) => {
+                const local = p.dataset.local, visita = p.dataset.visita;
+                const sortear = p.dataset.sortear ? ' (sortear localía)' : '';
+                p.innerHTML = `<strong>Partido ${i + 1}:</strong> J${local} vs J${visita}${sortear}`;
+            });
+        }
+
+        function inicializarRuletas() {
+            const canvasJugadores = document.getElementById('ruletaJugadores');
+            if (!canvasJugadores) return;
+            prepararCanvasRetina(canvasJugadores);
+            prepararCanvasRetina(document.getElementById('ruletaEquipos'));
+            jugadoresRestantes = [...JUGADORES_26X02];
+            dibujarRuleta(canvasJugadores, jugadoresRestantes, 0);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            inicializarSliders();
+            inicializarRuletas();
+            navegar(location.hash.slice(1) || 'inicio', false);
+        });
+    </script>
+</body>
+</html>
