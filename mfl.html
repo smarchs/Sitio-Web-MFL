@@ -660,6 +660,15 @@
                 });
         }
 
+        /* En cualquier Tabla por Coeficiente MFL (de una temporada o la
+           histórica) solo cuentan los jugadores que jugaron al menos la mitad
+           de las ediciones totales de ese ámbito. */
+        function ordenarPorCoeficienteMFLCalificados(ediciones, totales, ediciones_jugadas) {
+            const minimoEdiciones = Object.keys(ediciones).length * 0.5;
+            return ordenarPorCoeficienteMFL(ediciones, totales, ediciones_jugadas)
+                .filter(([, n]) => n >= minimoEdiciones);
+        }
+
         function formatearPromedio(promedio) {
             return promedio.toFixed(2).replace('.', ',');
         }
@@ -790,7 +799,7 @@
                 const ediciones = DATOS[anioActivo];
                 const { totales, ediciones_jugadas } = calcularTotales(ediciones);
                 return tipo === 'mfl'
-                    ? `<ul class="lista-mfl">${ordenarPorCoeficienteMFL(ediciones, totales, ediciones_jugadas).map(liPromedio).join('')}</ul>`
+                    ? `<ul class="lista-mfl">${ordenarPorCoeficienteMFLCalificados(ediciones, totales, ediciones_jugadas).map(liPromedio).join('')}</ul>`
                     : `<ul class="lista-mfl">${ordenarPorPuntaje(ediciones, totales, ediciones_jugadas).map(liPuntaje).join('')}</ul>`;
             });
         }
@@ -829,7 +838,7 @@
             const ediciones = todasLasEdicionesCombinadas();
             const { totales, ediciones_jugadas } = calcularTotalesHistoricos();
             if (tipo === 'mfl') {
-                return `<ul class="lista-mfl">${ordenarPorCoeficienteMFL(ediciones, totales, ediciones_jugadas).map(liPromedio).join('')}</ul>`;
+                return `<ul class="lista-mfl">${ordenarPorCoeficienteMFLCalificados(ediciones, totales, ediciones_jugadas).map(liPromedio).join('')}</ul>`;
             }
             return `<ul class="lista-mfl">${ordenarPorPuntaje(ediciones, totales, ediciones_jugadas).map(liPuntaje).join('')}</ul>`;
         }
@@ -945,7 +954,7 @@
            ============================================================ */
         const REGLAS = [
             { num: '01', texto: 'El torneo se organiza en temporadas divididas en ediciones de temática variable a lo largo del año. Para cada edición se confecciona una tabla de posiciones específica donde el ganador se lleva tantos puntos como participantes jueguen esa fecha; por ejemplo, en una edición de 10 jugadores, el primero suma 10 puntos. El último clasificado siempre obtiene 1 punto y el resto escala de forma proporcional. En paralelo, las Tablas Generales de la temporada acumulan y/o promedian los puntos obtenidos en cada edición para definir a los campeones absolutos.' },
-            { num: '02', texto: 'Las Tablas Generales son dos: una se basa en la sumatoria directa de los puntos obtenidos en ese ámbito, y la otra se basa en el promedio de los puntos obtenidos y la cantidad de ediciones disputadas por cada jugador, afectado a su vez por un factor de ajuste que denominamos el Coeficiente MFL. Sin este factor, alguien que jugó una sola edición y le fue muy bien superaría en el ranking a quien jugó muchas veces con buen nivel. Se calcula así: se toma el total de ediciones jugadas en ese ámbito —la temporada o el histórico— y se suma la mitad de esa cantidad tanto a las ediciones de cada jugador como a sus puntos, usando para esa parte extra el promedio general de puntos del ámbito. Por ejemplo: con 8 ediciones en una temporada se suman 4; con 16 en el histórico, se suman 8. Después se divide el total de puntos (los reales más los sumados) entre el total de ediciones (las reales más las sumadas). Cuanto más jugó un jugador respecto al total disponible, menos pesa este ajuste y más se acerca su Coeficiente MFL a su promedio real.' },
+            { num: '02', texto: 'Las Tablas Generales son dos: una se basa en la sumatoria directa de los puntos obtenidos en ese ámbito, y la otra se basa en el promedio de los puntos obtenidos y la cantidad de ediciones disputadas por cada jugador, afectado a su vez por un factor de ajuste que denominamos el Coeficiente MFL. Sin este factor, alguien que jugó menos ediciones y le fue muy bien superaría en el ranking a quien jugó muchas veces con buen nivel. Se calcula así: se toma el total de ediciones jugadas en ese ámbito —la temporada o el histórico— y se suma la mitad de esa cantidad tanto a las ediciones de cada jugador como a sus puntos, usando para esa parte extra el promedio general de puntos del ámbito. Por ejemplo: con 8 ediciones en una temporada se suman 4; con 16 en el histórico, se suman 8. Después se divide el total de puntos (los reales más los sumados) entre el total de ediciones (las reales más las sumadas). Cuanto más jugó un jugador respecto al total disponible, menos pesa este ajuste y más se acerca su Coeficiente MFL a su promedio real. En las Tablas por Coeficiente MFL solo cuentan los jugadores que jugaron al menos la mitad de las ediciones totales de ese ámbito.' },
             { num: '03', texto: 'Cada edición requiere un mínimo de 5 participantes para ser contabilizada de manera oficial y tiene un cupo máximo estricto de 10 jugadores. Si asisten 4 o menos no computa para las Tablas Generales. El sistema de inscripción se rige bajo la premisa de orden de llegada: los primeros 10 miembros del grupo en confirmar su asistencia aseguran su plaza. Todo jugador debe permanecer durante toda la jornada; en caso de retiro anticipado o llegada tardía que impida disputar los cruces, los partidos faltantes se computarán como derrotas automáticas por un resultado de 3-0. Asimismo, el participante que confirme su asistencia y no se presente a la jornada sufrirá una penalización directa de 3 puntos en la Tabla General por Puntaje de la temporada, afectando a su vez su promedio en la Tabla General por Coeficiente MFL.' },
             { num: '04', texto: 'Los equipos disponibles en cada edición surgen de su temática, y se asignan a los jugadores mediante un sistema de doble transparencia. En primer lugar, se utiliza una ruleta con los nombres de los jugadores presentes para determinar el orden de elección. Siguiendo ese orden, cada participante gira una segunda ruleta con los equipos previamente seleccionados para obtener el suyo. Una vez asignado el equipo no se permiten cambios bajo ninguna circunstancia para garantizar la equidad de la competencia.' },
             { num: '05', texto: 'Los encuentros otorgan 3 puntos por victoria, 1 por empate y 0 por derrota, definiéndose la localía mediante piedra, papel o tijera antes de empezar. En caso de repetir cruce, se juega obligatoriamente un partido de local y otro de visitante. El formato de la competencia y la duración de los tiempos se autocalibran según la asistencia para asegurar que la jornada presencial no supere las 3 horas totales, distribuyéndose de la siguiente manera:',
