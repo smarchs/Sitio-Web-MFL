@@ -429,6 +429,34 @@
     <!-- SECCIÓN: EVENTOS -->
     <main id="eventos" class="seccion">
         <h1>Eventos MFL<span>™</span></h1>
+        <p class="manifiesto-portada">Próximamente.</p>
+    </main>
+
+    <!-- ============================================================
+         SISTEMA DE SORTEO EN VIVO + FIXTURE — GUARDADO PARA REUSAR
+         ============================================================
+         Esto es exactamente lo que se usó en la 26x02 (dos ruletas:
+         orden de jugadores J1-J5, y equipos) más el fixture con
+         data-local/data-visita que arma solo el texto final.
+         El <template> no se renderiza en pantalla, así que no aparece
+         en el sitio — solo queda guardado en el código.
+
+         PARA LA PRÓXIMA EDICIÓN (26x03):
+         1) Actualizar el array JUGADORES_26X02 más abajo en el <script>
+            (nombre y ID de la constante) con los jugadores confirmados.
+         2) Si cambia la cantidad de jugadores, regenerar el fixture
+            (cruces + orden) con las mismas reglas que ya charlamos:
+            local/visitante fijo en los que se repiten, "sortear
+            localía" solo en los que se enfrentan una vez, cruces al
+            azar, y que nadie juegue dos partidos seguidos.
+         3) Copiar el contenido de este <template> adentro de
+            <main id="eventos">, en vez del "Próximamente.".
+         4) Actualizar Fecha / Edición / Temática / Juego arriba del todo.
+         Todas las funciones JS (dibujarRuleta, girarRuletaJugadores,
+         etc.) y el CSS de las ruletas siguen intactos más abajo en el
+         archivo — no hace falta tocar nada de eso, solo el HTML.
+    -->
+    <template id="plantillaSorteoEnVivo">
         <h2>Segunda Edición (26x02)</h2>
         <p class="regla-bloque"><strong>Fecha:</strong> Domingo 16 de agosto</p>
         <p class="regla-bloque"><strong>Temática:</strong> Copa del Mundo 2026</p>
@@ -475,7 +503,7 @@
         <p class="regla-bloque linea-partido" data-local="2" data-visita="5" data-sortear="1"><strong>Partido 13:</strong> J2 vs J5 (sortear localía)</p>
         <p class="regla-bloque linea-partido" data-local="1" data-visita="4" data-sortear="1"><strong>Partido 14:</strong> J1 vs J4 (sortear localía)</p>
         <p class="regla-bloque linea-partido" data-local="2" data-visita="3" data-sortear="1"><strong>Partido 15:</strong> J2 vs J3 (sortear localía)</p>
-    </main>
+    </template>
 
     <!-- SECCIÓN: CAMPEONES -->
     <main id="campeones" class="seccion">
@@ -506,6 +534,9 @@
             2026: {
                 "26x01": { titulo: "Primera Edición", resultados: [
                     ["Renzo Gallegos", 5], ["Elías Parra", 4], ["Marcelo Silva", 3], ["Gonzalo Silva", 2], ["Fidel Parra", 1]
+                ]},
+                "26x02": { titulo: "Segunda Edición", resultados: [
+                    ["Elías Parra", 5], ["Renzo Gallegos", 4], ["Fidel Parra", 3], ["Diego Aragón", 2], ["Marcelo Silva", 1]
                 ]}
             },
             2025: {
@@ -630,9 +661,7 @@
         }
 
         function formatearPromedio(promedio) {
-            let texto = promedio.toFixed(1).replace('.', ',');
-            if (texto.endsWith(',0')) texto = texto.slice(0, -2);
-            return texto;
+            return promedio.toFixed(2).replace('.', ',');
         }
 
         function liPuntaje([nombre, pts], i) {
@@ -949,8 +978,8 @@
                 nombre: 'El Bicho',
                 descripcion: 'Este premio rinde homenaje a Cristiano Ronaldo, reconocido como el máximo goleador de la historia del fútbol profesional. Se otorga al jugador o jugadores que hayan anotado la mayor cantidad de goles en la edición, en reconocimiento a su capacidad goleadora, eficacia ofensiva y liderazgo dentro del campo de juego. Se entrega desde la edición 24x05.',
                 ganadores: [
+                    ['Elías Parra', '24x05 • 24x06 • 25x06 • 26x02'],
                     ['Renzo Gallegos', '24x05 • 24x06 • 25x03 • 26x01'],
-                    ['Elías Parra', '24x05 • 24x06 • 25x06'],
                     ['Santiago Pereyra', '24x05 • 25x01'],
                     ['Emanuel Marqués', '25x05'],
                     ['Gonzalo Silva', '25x04'],
@@ -965,11 +994,11 @@
                 ganadores: [
                     ['Elías Parra', '24x05 • 24x07 • 25x04 • 25x06 • 26x01'],
                     ['Marcelo Silva', '24x05 • 24x08 • 25x07'],
+                    ['Fidel Parra', '24x07 • 26x02'],
                     ['Santiago Pereyra', '25x01 • 25x04'],
                     ['Emanuel Marqués', '25x05'],
                     ['Franco Aguirre', '25x03'],
                     ['Agustín Marqués', '25x02'],
-                    ['Fidel Parra', '24x07'],
                     ['Renzo Gallegos', '24x06']
                 ]
             },
@@ -981,6 +1010,7 @@
                     ['Agustín Marqués', '25x02 • 25x06'],
                     ['Fidel Parra', '24x07 • 25x03'],
                     ['Renzo Gallegos', '24x06 • 25x01'],
+                    ['Diego Aragón', '26x02'],
                     ['Benjamín Márquez', '25x05'],
                     ['Emanuel Martínez', '24x08']
                 ]
