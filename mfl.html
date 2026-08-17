@@ -333,6 +333,24 @@
 
         html { scroll-behavior: smooth; }
 
+        /* GRÁFICA (línea de puntos por edición, un trazo por jugador) */
+        .grafica-contenedor {
+            display: flex; border: 1px solid var(--borde); border-radius: 16px;
+            background: var(--bg-header); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            box-shadow: var(--sombra-panel); overflow: hidden;
+        }
+        #ejeYGrafica { flex-shrink: 0; display: block; border-right: 1px solid var(--borde); }
+        .grafica-scroll { overflow-x: auto; flex: 1; -webkit-overflow-scrolling: touch; position: relative; }
+        .grafica-scroll canvas { display: block; }
+        .tooltip-grafica {
+            position: absolute; pointer-events: none; z-index: 10;
+            padding: 6px 11px; border-radius: 8px; font-size: 12px; font-weight: 600;
+            white-space: nowrap; transform: translate(-50%, -50%);
+            opacity: 0; transition: opacity var(--dur-hover) var(--curva-apple);
+            box-shadow: var(--sombra-panel);
+        }
+        .tooltip-grafica.visible { opacity: 1; }
+
         /* RULETAS DE SORTEO (Eventos) */
         .bloque-ruleta { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 15px; }
         .bloque-ruleta + .bloque-ruleta, .bloque-ruleta + #btnReiniciarSorteo { margin-top: 30px; }
@@ -385,6 +403,7 @@
                 <li style="--i:5"><a href="#temporadas" data-seccion="temporadas" onclick="navegar('temporadas'); return false;">Temporadas</a></li>
                 <li style="--i:6"><a href="#campeones" data-seccion="campeones" onclick="navegar('campeones'); return false;">Campeones</a></li>
                 <li style="--i:7"><a href="#historico" data-seccion="historico" onclick="navegar('historico'); return false;">Histórico</a></li>
+                <li style="--i:8"><a href="#grafica" data-seccion="grafica" onclick="navegar('grafica'); return false;">Gráfica</a></li>
             </ul>
         </nav>
     </div>
@@ -517,6 +536,18 @@
 
         <div class="selector-slider" id="selectorHistorico"></div>
         <div class="panel-flotante" id="panelHistorico"></div>
+    </main>
+
+    <!-- SECCIÓN: GRÁFICA -->
+    <main id="grafica" class="seccion">
+        <h1>Gráfica MFL<span>™</span></h1>
+        <div class="selector-slider" id="selectorGraficaAnios"></div>
+        <div class="grafica-contenedor">
+            <canvas id="ejeYGrafica"></canvas>
+            <div class="grafica-scroll" id="graficaScroll">
+                <canvas id="lienzoGrafica"></canvas>
+            </div>
+        </div>
     </main>
 
     <footer>© 2026 • M.A.F.I.A. • smarchs STUDIOS</footer>
@@ -1043,7 +1074,7 @@
         /* ============================================================
            CONTROL DESLIZANTE GENÉRICO (botones + indicador + uno o más paneles flotantes)
            ============================================================ */
-        function crearSelectorDeslizante({ contenedorId, indicadorId, paneles, opciones, inicial }) {
+        function crearSelectorDeslizante({ contenedorId, indicadorId, paneles = [], opciones, inicial, alSeleccionar }) {
             const cont = document.getElementById(contenedorId);
             cont.innerHTML = `<span class="indicador-slider" id="${indicadorId}"></span>` + opciones
                 .map(o => `<button class="btn-slider" data-valor="${o.valor}">${o.etiqueta}</button>`)
@@ -1071,6 +1102,8 @@
                     void panel.offsetWidth;
                     panel.classList.add('entrar');
                 });
+
+                if (alSeleccionar) alSeleccionar(valor);
             }
 
             cont.querySelectorAll('.btn-slider').forEach(b => {
@@ -1118,7 +1151,7 @@
         /* ============================================================
            NAVEGACIÓN (tabs + routing por URL)
            ============================================================ */
-        const SECCIONES = ['inicio', 'reglamento', 'eventos', 'premios', 'temporadas', 'campeones', 'historico'];
+        const SECCIONES = ['inicio', 'reglamento', 'eventos', 'premios', 'temporadas', 'campeones', 'historico', 'grafica'];
         const menuBtn = document.getElementById('menuBtn');
         const menuNav = document.getElementById('menuNav');
 
@@ -1150,6 +1183,10 @@
                 destino.classList.add('active');
                 resincronizarIndicadores(destino);
                 if (idSeccion === 'campeones') renderCampeones();
+                if (idSeccion === 'grafica') {
+                    const scrollContenedor = document.getElementById('graficaScroll');
+                    if (scrollContenedor) scrollContenedor.scrollLeft = scrollContenedor.scrollWidth;
+                }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
 
@@ -1493,9 +1530,247 @@
             dibujarRuleta(canvasJugadores, jugadoresRestantes, 0);
         }
 
+        /* ============================================================
+           GRÁFICA: una línea por jugador, puesto obtenido por edición,
+           desde la primera edición histórica hasta la más reciente.
+           ============================================================ */
+        const GRAFICA_ANCHO_POR_EDICION = 100; // también define la separación entre posiciones: la cuadrícula es cuadrada
+        const GRAFICA_MARGEN_SUPERIOR = 50;
+        const GRAFICA_MARGEN_INFERIOR = 50;
+        const GRAFICA_ANCHO_EJE_Y = 46;
+        const GRAFICA_RADIO_PUNTO = 13;
+
+        function iniciales(nombre) {
+            return nombre.split(' ').map(palabra => palabra[0]).join('').toUpperCase();
+        }
+
+        /* Colores para las líneas y los puntos. Marcelo Silva va fijo en
+           naranja. Al resto se le reparte un tono de una lista de 10 bien
+           separados entre sí (no un barrido parejo del círculo completo,
+           que deja tonos vecinos parecidos) combinado con uno de tres
+           perfiles de saturación/luminosidad — así, aunque dos jugadores
+           terminen compartiendo tono, se distinguen por lo clara/oscura y
+           lo saturada que es cada versión. */
+        function generarColoresJugadores(nombres) {
+            const colores = {};
+            colores['Marcelo Silva'] = { h: 28, s: 62, l: 46 };
+            const otros = nombres.filter(n => n !== 'Marcelo Silva');
+            const tonosBase = [340, 200, 90, 260, 55, 170, 300, 140, 230, 10];
+            const perfiles = [
+                { s: 62, l: 42 },
+                { s: 45, l: 60 },
+                { s: 75, l: 50 }
+            ];
+            otros.forEach((nombre, i) => {
+                const tono = tonosBase[i % tonosBase.length];
+                const perfil = perfiles[Math.floor(i / tonosBase.length) % perfiles.length];
+                colores[nombre] = { h: tono, s: perfil.s, l: perfil.l };
+            });
+            return colores;
+        }
+
+        function hslaJugador(color, alpha) {
+            return `hsla(${color.h}, ${color.s}%, ${color.l}%, ${alpha})`;
+        }
+
+        function prepararCanvasResponsive(canvas, anchoCSS, altoCSS) {
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = anchoCSS * dpr;
+            canvas.height = altoCSS * dpr;
+            canvas.style.width = anchoCSS + 'px';
+            canvas.style.height = altoCSS + 'px';
+            canvas.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+
+        let puntosGraficaClicables = [];
+
+        function dibujarGrafica() {
+            const ediciones = todasLasEdicionesCombinadas();
+            const codigos = Object.keys(ediciones);
+
+            const porJugador = {};
+            codigos.forEach((codigo, x) => {
+                const ordenado = [...ediciones[codigo].resultados].sort((a, b) => b[1] - a[1]);
+                ordenado.forEach(([nombre], indice) => {
+                    if (!porJugador[nombre]) porJugador[nombre] = [];
+                    porJugador[nombre].push({ x, y: indice + 1 }); // y = puesto (1 = campeón de esa edición)
+                });
+            });
+            const nombres = Object.keys(porJugador);
+            const colores = generarColoresJugadores(nombres);
+
+            let maxPuesto = 1;
+            nombres.forEach(n => porJugador[n].forEach(p => { if (p.y > maxPuesto) maxPuesto = p.y; }));
+
+            // Cuadrícula cuadrada: la separación vertical entre posiciones es
+            // la misma que la separación horizontal entre ediciones. Además se
+            // deja un colchón (medio ancho de celda) abajo del último puesto,
+            // para que ese punto no quede pegado al borde del cuadro. Arriba
+            // del puesto 1 no lleva colchón: queda pegado al margen a propósito.
+            const graficaBufferVertical = GRAFICA_ANCHO_POR_EDICION / 2;
+            const graficaAltoUtil = Math.max(1, maxPuesto - 1) * GRAFICA_ANCHO_POR_EDICION;
+            const graficaAlto = graficaAltoUtil + graficaBufferVertical;
+            const altoTotal = graficaAlto + GRAFICA_MARGEN_SUPERIOR + GRAFICA_MARGEN_INFERIOR;
+            const anchoPlot = codigos.length * GRAFICA_ANCHO_POR_EDICION + 50;
+
+            const canvasEjeY = document.getElementById('ejeYGrafica');
+            const canvasPlot = document.getElementById('lienzoGrafica');
+            prepararCanvasResponsive(canvasEjeY, GRAFICA_ANCHO_EJE_Y, altoTotal);
+            prepararCanvasResponsive(canvasPlot, anchoPlot, altoTotal);
+            const ctxY = canvasEjeY.getContext('2d');
+            const ctxP = canvasPlot.getContext('2d');
+            ctxY.clearRect(0, 0, GRAFICA_ANCHO_EJE_Y, altoTotal);
+            ctxP.clearRect(0, 0, anchoPlot, altoTotal);
+
+            const colorSecundario = getComputedStyle(document.documentElement).getPropertyValue('--color-secundario').trim();
+            const colorBorde = getComputedStyle(document.documentElement).getPropertyValue('--borde').trim();
+            const fuente = getComputedStyle(document.documentElement).getPropertyValue('--fuente');
+
+            // Eje invertido a propósito: el puesto 1 (mejor resultado) queda arriba,
+            // como en una tabla de posiciones, y los últimos puestos abajo.
+            function coordY(puesto) {
+                if (maxPuesto <= 1) return GRAFICA_MARGEN_SUPERIOR + graficaAlto / 2;
+                return GRAFICA_MARGEN_SUPERIOR + ((puesto - 1) / (maxPuesto - 1)) * graficaAltoUtil;
+            }
+            function coordX(x) {
+                return x * GRAFICA_ANCHO_POR_EDICION + GRAFICA_ANCHO_POR_EDICION / 2;
+            }
+
+            // Una línea sólida por CADA posición (no se saltea ninguna), con su
+            // número a la izquierda — mismo tratamiento que las líneas por edición.
+            for (let v = 1; v <= maxPuesto; v++) {
+                const y = coordY(v);
+                ctxY.fillStyle = colorSecundario;
+                ctxY.font = '11px ' + fuente;
+                ctxY.textAlign = 'right';
+                ctxY.textBaseline = 'middle';
+                ctxY.fillText(v + 'º', GRAFICA_ANCHO_EJE_Y - 8, y);
+
+                ctxP.strokeStyle = colorBorde;
+                ctxP.beginPath();
+                ctxP.moveTo(0, y);
+                ctxP.lineTo(anchoPlot, y);
+                ctxP.stroke();
+            }
+
+            // Una línea vertical por cada edición, de referencia, y su código debajo.
+            codigos.forEach((codigo, x) => {
+                const lineaX = coordX(x);
+                ctxP.strokeStyle = colorBorde;
+                ctxP.beginPath();
+                ctxP.moveTo(lineaX, GRAFICA_MARGEN_SUPERIOR);
+                ctxP.lineTo(lineaX, GRAFICA_MARGEN_SUPERIOR + graficaAlto);
+                ctxP.stroke();
+
+                ctxP.fillStyle = colorSecundario;
+                ctxP.font = '600 11px ' + fuente;
+                ctxP.textAlign = 'center';
+                ctxP.fillText(codigo, lineaX, GRAFICA_MARGEN_SUPERIOR + graficaAlto + 25);
+            });
+
+            puntosGraficaClicables = [];
+
+            // Primero TODAS las líneas de TODOS los jugadores, y recién después
+            // TODOS los puntos: así ningún punto queda tapado por una línea
+            // ajena que pase por encima — el punto siempre se ve por delante.
+            nombres.forEach(nombre => {
+                const color = colores[nombre];
+                const puntos = porJugador[nombre];
+                ctxP.lineWidth = 2;
+                for (let idx = 1; idx < puntos.length; idx++) {
+                    const anterior = puntos[idx - 1], actual = puntos[idx];
+                    const esContinuo = actual.x - anterior.x === 1;
+                    ctxP.strokeStyle = hslaJugador(color, esContinuo ? 0.55 : 0.4);
+                    ctxP.setLineDash(esContinuo ? [] : [6, 5]);
+                    ctxP.beginPath();
+                    ctxP.moveTo(coordX(anterior.x), coordY(anterior.y));
+                    ctxP.lineTo(coordX(actual.x), coordY(actual.y));
+                    ctxP.stroke();
+                }
+                ctxP.setLineDash([]);
+            });
+
+            nombres.forEach(nombre => {
+                const color = colores[nombre];
+                const puntos = porJugador[nombre];
+                const texto = iniciales(nombre);
+                puntos.forEach(p => {
+                    const px = coordX(p.x), py = coordY(p.y);
+                    ctxP.fillStyle = hslaJugador(color, 0.95);
+                    ctxP.beginPath();
+                    ctxP.arc(px, py, GRAFICA_RADIO_PUNTO, 0, Math.PI * 2);
+                    ctxP.fill();
+
+                    ctxP.font = '700 10px ' + fuente;
+                    ctxP.textAlign = 'center';
+                    ctxP.textBaseline = 'middle';
+                    ctxP.fillStyle = color.l >= 55 ? '#1d1d1f' : '#ffffff';
+                    ctxP.fillText(texto, px, py);
+
+                    puntosGraficaClicables.push({ px, py, nombre, color });
+                });
+            });
+        }
+
+        function mostrarTooltipGrafica(nombre, px, py, color) {
+            let tooltip = document.getElementById('tooltipGrafica');
+            if (!tooltip) {
+                tooltip = document.createElement('div');
+                tooltip.id = 'tooltipGrafica';
+                tooltip.className = 'tooltip-grafica';
+                document.getElementById('graficaScroll').appendChild(tooltip);
+            }
+            tooltip.textContent = nombre;
+            tooltip.style.left = px + 'px';
+            tooltip.style.top = py + 'px';
+            tooltip.style.background = hslaJugador(color, 1);
+            tooltip.style.color = color.l >= 55 ? '#1d1d1f' : '#ffffff';
+            tooltip.classList.add('visible');
+        }
+
+        function ocultarTooltipGrafica() {
+            const tooltip = document.getElementById('tooltipGrafica');
+            if (tooltip) tooltip.classList.remove('visible');
+        }
+
+        function irATemporadaGrafica(anio) {
+            const codigos = Object.keys(todasLasEdicionesCombinadas());
+            const indice = codigos.findIndex(c => c.startsWith(String(anio).slice(-2) + 'x'));
+            if (indice === -1) return;
+            document.getElementById('graficaScroll').scrollTo({ left: indice * GRAFICA_ANCHO_POR_EDICION, behavior: 'smooth' });
+        }
+
+        function inicializarGrafica() {
+            const canvas = document.getElementById('lienzoGrafica');
+            if (!canvas) return;
+            dibujarGrafica();
+
+            const anios = Object.keys(DATOS).sort((a, b) => a - b);
+            crearSelectorDeslizante({
+                contenedorId: 'selectorGraficaAnios', indicadorId: 'indicadorGraficaAnios',
+                opciones: anios.map(a => ({ valor: a, etiqueta: a })),
+                inicial: anios[anios.length - 1],
+                alSeleccionar: (anio) => irATemporadaGrafica(anio)
+            });
+
+            canvas.addEventListener('click', (e) => {
+                const clickX = e.offsetX, clickY = e.offsetY;
+                const encontrado = puntosGraficaClicables.find(p => Math.hypot(p.px - clickX, p.py - clickY) <= GRAFICA_RADIO_PUNTO + 3);
+                if (encontrado) {
+                    mostrarTooltipGrafica(encontrado.nombre, encontrado.px, encontrado.py, encontrado.color);
+                } else {
+                    ocultarTooltipGrafica();
+                }
+            });
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.grafica-contenedor')) ocultarTooltipGrafica();
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             inicializarSliders();
             inicializarRuletas();
+            inicializarGrafica();
             navegar(location.hash.slice(1) || 'inicio', false);
         });
     </script>
